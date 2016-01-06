@@ -1,0 +1,72 @@
+CALLHORIZONS - a python interface to JPL HORIZONS ephemerides and
+               orbital elements
+
+
+OVERVIEW: 
+
+This module provides a convenient python interface to the JPL HORIZONS
+system by directly accessing and parsing the http website. Ephemerides
+can be obtained through get_ephemerides, orbital elements through
+get_orbitalelements. Query results are provided as arrays of
+dictionaries, which hold all information for one single point in
+time. Details on the individual parameters that are queried are
+provided through the what_is function.
+
+
+INSTALLATION:
+
+Simply clone the repository from github into an directory on your
+computer. In order to use the code in python, add the directory to
+your PYTHONPATH variable.
+
+
+EXAMPLES:
+
+* obtain ephemerides of asteroid 433 Eros from Mauna Kea at two
+  discrete dates and display some properties for each date:
+
+import callhorizons
+
+ephemerides = callhorizons.get_ephemerides('433', '568', discretetimes=[2457392.5, 2457423.3, 2457505.8])
+
+for eph in ephemerides:
+   print eph['datetime'], eph['alpha'], eph['V']
+
+
+* find out what 'alpha' is and what data type it has:
+
+import callhorizons
+
+callhorizons.what_is('alpha')
+
+
+* obtain orbital elements for asteroid 3552 Don Quixote for a time
+  range, list all available parameters, and display its mean and true
+  anomalies:
+
+import callhorizons
+
+elements = callhorizons.get_orbitalelements('3552', start_time='2015-10-05', stop_time='2015-12-05', step_size='1d')
+
+print elements[0].keys()
+
+for el in elements:
+   print el['datetime_jd'], el['meananomaly'], el['trueanomaly']
+
+
+LICENSE:
+
+This code is published under the MIT License. Feel free to use this
+code and modify it to your own needs. Please note that the code is
+provided as is, without any warranty (see LICENSE file for details).
+
+Copyright (c) 2016 Michael Mommert
+
+
+CONTACT:
+
+Feel free to contact me with your suggestions and comments!
+
+
+michael.mommert@nau.edu, 2016-01-06
+This code is inspired by code created by Alex Hagen.
