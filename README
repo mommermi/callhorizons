@@ -10,7 +10,9 @@ can be obtained through get_ephemerides, orbital elements through
 get_orbitalelements. Query results are provided as arrays of
 dictionaries, which hold all information for one single point in
 time. Details on the individual parameters that are queried are
-provided through the what_is function.
+provided through the what_is function. Function export2pyephem provides
+a convenient interface to the PyEphem module that allows for ephemerides
+calculations on your machine.
 
 
 INSTALLATION:
@@ -54,6 +56,8 @@ for el in elements:
    print el['datetime_jd'], el['meananomaly'], el['trueanomaly']
 
 
+More example code is provided as comments in callhorizons.py.
+
 LICENSE:
 
 This code is published under the MIT License. Feel free to use this
@@ -68,7 +72,7 @@ CONTACT:
 Feel free to contact me with your suggestions and comments!
 
 
-michael.mommert@nau.edu, 2016-01-06
+michael.mommert@nau.edu, 2016-01-06 (latest version: 2016-01-13)
 This code is inspired by code created by Alex Hagen.
 
 
