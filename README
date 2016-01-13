@@ -70,3 +70,10 @@ Feel free to contact me with your suggestions and comments!
 
 michael.mommert@nau.edu, 2016-01-06
 This code is inspired by code created by Alex Hagen.
+
+
+CHANGELOG:
+
+- 2016-01-13: implemented function export2pyephem that exports orbital
+   	      elements into a PyEphem object
+	      (requires PyEphem: http://rhodesmill.org/pyephem/)

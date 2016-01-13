@@ -4,18 +4,20 @@
     This module provides a convenient python interface to the JPL
     HORIZONS system by directly accessing and parsing the http
     website. Ephemerides can be obtained through get_ephemerides,
-    orbital elements through get_orbitalelements.
+    orbital elements through get_orbitalelements. Function 
+    export2pyephem provides an interface to the PyEphem module.
 
-    michael.mommert@nau.edu, 2016-01-06
+    michael.mommert@nau.edu, 2016-01-06 (latest version: 2016-01-13)
     This code is inspired by code created by Alex Hagen.
 
 """
 
+import math
 import urllib2
 
 def what_is(key):
-    """ provides information on dictionary keys used in this module and
-        how they are implemented
+    """provides information on dictionary keys used in this module and
+       how they are implemented
     """
     try:
         return { 'datetime': 'YYYY-MM-DD HH-MM in UT [string]',
@@ -70,19 +72,18 @@ def get_ephemerides(objectname, observatory_code,
                     solar_elongation=[0,180], 
                     skip_daylight=False):
 
-    """ call HORIZONS website to obtain ephemerides 
+    """call HORIZONS website to obtain ephemerides 
 
-        Input: - objectname (target number, name, designation)
-               - observatory_code (MPC observatory code)
-               - start_time, stop_time (YYYY-MM-DD HH-MM UT) and
-                 step_size (e.g., 10m, 5h, 3d) or
-               - discretetimes (array of max 15 julian dates)
-               - airmass_lessthan (max airmass)
-               - solar_elongation (permissible range in deg)
-               - skip_daylight (True/False) 
-
-       Output:   array of dictionaries with individual ephemerides
-                 for each time step
+       Input: - objectname (target number, name, designation)
+              - observatory_code (MPC observatory code)
+              - start_time, stop_time (YYYY-MM-DD HH-MM UT) and
+                step_size (e.g., 10m, 5h, 3d) or
+              - discretetimes (array of max 15 julian dates)
+              - airmass_lessthan (max airmass)
+              - solar_elongation (permissible range in deg)
+              - skip_daylight (True/False) 
+       Output:  array of dictionaries with individual ephemerides
+                for each time step
     """
 
     # queried fields (see HORIZONS website for details)
@@ -244,16 +245,15 @@ def get_orbitalelements(objectname,
                         start_time='', stop_time='', step_size='',
                         discretetimes=[], 
                         center='500@10'):
-    """ call HORIZONS website to obtain orbital elements
+    """call HORIZONS website to obtain orbital elements for different epochs
 
-        Input: - objectname (target number, name, designation)
-               - start_time, stop_time (YYYY-MM-DD HH-MM UT) and
-                 step_size (e.g., 10m, 5h, 3d) or
-               - discretetimes (array of max 15 julian dates)
-               - center_code (if other than the Sun's center)
-
-       Output:   array of dictionaries with individual orbital
-                 elements for each time step
+       Input: - objectname (target number, name, designation)
+              - start_time, stop_time (YYYY-MM-DD HH-MM UT) and
+                step_size (e.g., 10m, 5h, 3d) or
+              - discretetimes (array of max 15 julian dates)
+              - center_code (if other than the Sun's center)
+       Output:  array of dictionaries with individual orbital
+                elements for each time step
     """
 
     # encode objectname for use in URL
@@ -355,11 +355,60 @@ def get_orbitalelements(objectname,
             if (item.find('AD') > -1):                           
                 information['Q'] = float(line[idx])
             information['targetname'] = targetname
+            information['H'] = H
+            information['G'] = G
 
         if len(information.keys()) > 0:
             elements.append(information)
 
     return elements
+
+
+def export2pyephem(objectname,  
+                   start_time='', stop_time='', step_size='',
+                   discretetimes=[], 
+                   center='500@10',
+                   equinox=2000.):
+    """obtain orbital elements and export them into pyephem objects 
+       (note: this function requires PyEphem to be installed)
+    
+       Input: - objectname (target number, name, designation)
+              - start_time, stop_time (YYYY-MM-DD HH-MM UT) and
+                step_size (e.g., 10m, 5h, 3d) or
+              - discretetimes (array of max 15 julian dates)
+              - center_code (if other than the Sun's center)
+       Output:  array of pyephem objects for each time step
+
+    """
+
+    try:
+        import ephem
+    except ImportError:
+        print "ERROR: cannot import module PyEphem"
+        return None
+
+    # obtain orbital elements
+    elements = get_orbitalelements(objectname, start_time, stop_time,
+                                   step_size, discretetimes, center)
+
+    objects = []
+    for el in elements:
+        n = 0.9856076686/math.sqrt(el['a']**3) # mean daily motion
+        epoch_djd = el['datetime_jd']-2415020.0  # Dublin Julian date
+        epoch = ephem.date(epoch_djd)
+        epoch_str = "%d/%f/%d" %(epoch.triple()[1], epoch.triple()[2], 
+                                 epoch.triple()[0])
+
+        # export to PyEphem
+        objects.append(ephem.readdb("%s,e,%f,%f,%f,%f,%f,%f,%f,%s,%i,%f,%f" %
+                                    (el['targetname'], el['incl'], el['node'],
+                                     el['argper'], el['a'], n, el['e'],
+                                     el['meananomaly'], epoch_str, equinox,
+                                    el['H'], el['G'])))
+    
+    return objects
+
+
 
 
 ##### Example Code (just uncomment some of the following lines)
@@ -396,5 +445,22 @@ def get_orbitalelements(objectname,
 #   for key in sorted(el.keys()):
 #     print '%s=%s, ' % (key, str(el[key])),
 #   print ''
+
+
+### export orbital elements for 433 Eros to PyEphem and use it to
+### determine rise, transit, and set times
+# eros = export2pyephem('433', start_time='2015-10-05', stop_time='2015-12-05', 
+#                       step_size='1d')
+
+# # PyEphem code (see http://rhodesmill.org/pyephem/quick.html)
+# import ephem
+# nau = ephem.Observer() # setup observer site
+# nau.lon = -111.653152/180.*math.pi
+# nau.lat = 35.184108/180.*math.pi
+# nau.elevation = 2100 # m
+# nau.date = '2015/10/5 01:23' # UT 
+# print ('next rise: %s\n' % nau.next_rising(eros[0])), \
+#     ('next transit: %s\n' % nau.next_transit(eros[0])), \
+#     ('next setting: %s' % nau.next_setting(eros[0]))
 
 
