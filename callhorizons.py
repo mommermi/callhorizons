@@ -217,9 +217,7 @@ def get_ephemerides(objectname, observatory_code,
                 information['lighttime'] = float(line[idx])*60.
             if (item.find('S-O-T') > -1):
                 information['elong'] = float(line[idx])
-            if (item.find('S-O-T') > -1):
-                information['elong'] = float(line[idx])
-            if (item.find('/r S-T-O') > -1):
+            if (item.find('/r    S-T-O') > -1):
                 information['elongFlag'] = {'/L':'leading', '/T':'trailing'}\
                                            [line[idx].split()[0]]
                 information['alpha'] = float(line[idx].split()[1])
