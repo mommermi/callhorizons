@@ -126,6 +126,8 @@ def get_ephemerides(objectname, observatory_code,
     else:
         url = url + "&SKIP_DAYLT='NO'"
 
+    # print url
+
     ### call HORIZONS 
     while True:
         try:
@@ -167,9 +169,15 @@ def get_ephemerides(objectname, observatory_code,
 
         # create a dictionary for each date (each line)
         for idx,item in enumerate(headerline):
+            # ignore line that don't hold any data
+            if len(line) < len(quantities.split(',')):
+                continue
+
             if (item.find('Date__(UT)__HR:MN') > -1):
                 information['datetime'] = line[idx]
             if (item.find('Date_________JDUT') > -1):
+                print line
+                print idx, len(line)
                 information['datetime_jd'] = float(line[idx])
             if (item.find('R.A._(ICRF/J2000.0)') > -1):
                 information['RA'] = float(line[idx])
@@ -182,9 +190,15 @@ def get_ephemerides(objectname, observatory_code,
                 information['DECrate'] = float(line[idx])/3600.
                 # arcsec per second
             if (item.find('Azi_(a-app)') > -1):
-                information['AZ'] = float(line[idx])
+                try: # AZ not given, e.g. for space telescopes
+                    information['AZ'] = float(line[idx])
+                except ValueError: 
+                    pass
             if (item.find('Elev_(a-app)') > -1):
-                information['EL'] = float(line[idx])
+                try: # EL not given, e.g. for space telescopes                
+                    information['EL'] = float(line[idx])
+                except ValueError:
+                    pass
             if (item.find('a-mass') > -1):
                 information['airmass'] = line[idx]
             if (item.find('mag_ex') > -1):
@@ -207,10 +221,10 @@ def get_ephemerides(objectname, observatory_code,
                 information['elong'] = float(line[idx])
             if (item.find('S-O-T') > -1):
                 information['elong'] = float(line[idx])
-            if (item.find('/r') > -1):
-                information['elongFlag'] = {'/L':'leading', '/T':'trailing'}[line[idx]]
-            if (item.find('S-T-O') > -1):
-                information['alpha'] = float(line[idx])
+            if (item.find('/r S-T-O') > -1):
+                information['elongFlag'] = {'/L':'leading', '/T':'trailing'}\
+                                           [line[idx].split()[0]]
+                information['alpha'] = float(line[idx].split()[1])
             if (item.find('PsAng') > -1):
                 information['sunTargetPA'] = line[idx]
             if (item.find('PsAMV') > -1):
