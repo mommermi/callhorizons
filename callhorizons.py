@@ -176,8 +176,6 @@ def get_ephemerides(objectname, observatory_code,
             if (item.find('Date__(UT)__HR:MN') > -1):
                 information['datetime'] = line[idx]
             if (item.find('Date_________JDUT') > -1):
-                print line
-                print idx, len(line)
                 information['datetime_jd'] = float(line[idx])
             if (item.find('R.A._(ICRF/J2000.0)') > -1):
                 information['RA'] = float(line[idx])
