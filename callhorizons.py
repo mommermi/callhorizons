@@ -13,6 +13,7 @@
 """
 
 import math
+import time
 import urllib2
 
 def what_is(key):
