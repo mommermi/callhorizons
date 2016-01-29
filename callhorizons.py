@@ -127,7 +127,7 @@ def get_ephemerides(objectname, observatory_code,
     else:
         url = url + "&SKIP_DAYLT='NO'"
 
-    # print url
+    #print url
 
     ### call HORIZONS 
     while True:
@@ -241,8 +241,12 @@ def get_ephemerides(objectname, observatory_code,
                 else:
                     information['DEC_3sigma'] = float(line[idx])
             information['targetname'] = targetname
-            information['H'] = H
-            information['G'] = G
+            # H, G may not exist (e.g., in the case of comets)
+            try:
+                information['H'] = H
+                information['G'] = G
+            except UnboundLocalError:
+                pass
 
         if len(information.keys()) > 0:
             ephemerides.append(information)
