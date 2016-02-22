@@ -127,7 +127,7 @@ def get_ephemerides(objectname, observatory_code,
     else:
         url = url + "&SKIP_DAYLT='NO'"
 
-    print url
+    #print url
 
     ### call HORIZONS 
     while True:
