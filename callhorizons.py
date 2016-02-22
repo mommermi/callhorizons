@@ -31,7 +31,7 @@ def what_is(key):
                  'EL': 'elevation (deg) [float]',
                  'airmass': 'optical airmass [string]',
                  'magextinct': 'V-mag extinction due to airmass (mag) [string]',
-                 'V': 'V magnitude [float]',
+                 'V': 'V magnitude (total mag for comets) [float]',
                  'illumination': 'fraction of illuminated disk [float]',
                  'EclLon': 'heliocentr. ecliptic longitude (deg, J2000.0) [float]',
                  'EclLat': 'heliocentr. ecliptic latitude (deg, J2000.0) [float]',
@@ -210,7 +210,8 @@ def get_ephemerides(objectname, observatory_code,
                 information['EclLon'] = float(line[idx]) 
             if (item.find('hEcl-Lat') > -1):
                 information['EclLat'] = float(line[idx]) 
-            if (item.find('  r') > -1) and (headerline[idx+1].find("rdot") > -1):
+            if (item.find('  r') > -1) and \
+               (headerline[idx+1].find("rdot") > -1):
                 information['r'] = float(line[idx])
             if (item.find('delta') > -1):
                 information['delta'] = float(line[idx])
@@ -241,6 +242,8 @@ def get_ephemerides(objectname, observatory_code,
                     information['DEC_3sigma'] = -1
                 else:
                     information['DEC_3sigma'] = float(line[idx])
+            if (item.find('T-mag') > -1):
+                information['V'] = float(line[idx])
             information['targetname'] = targetname
             # H, G may not exist (e.g., in the case of comets)
             try:
