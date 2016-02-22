@@ -127,7 +127,7 @@ def get_ephemerides(objectname, observatory_code,
     else:
         url = url + "&SKIP_DAYLT='NO'"
 
-    #print url
+    print url
 
     ### call HORIZONS 
     while True:
@@ -218,10 +218,11 @@ def get_ephemerides(objectname, observatory_code,
                 information['lighttime'] = float(line[idx])*60.
             if (item.find('S-O-T') > -1):
                 information['elong'] = float(line[idx])
-            if (item.find('/r    S-T-O') > -1):
+            if (item.find('S-T-O') > -1):
+                information['alpha'] = float(line[idx])
+            if (item.find('/r') > -1):
                 information['elongFlag'] = {'/L':'leading', '/T':'trailing'}\
-                                           [line[idx].split()[0]]
-                information['alpha'] = float(line[idx].split()[1])
+                                           [line[idx]]
             if (item.find('PsAng') > -1):
                 information['sunTargetPA'] = line[idx]
             if (item.find('PsAMV') > -1):
