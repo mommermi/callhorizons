@@ -71,7 +71,8 @@ def get_ephemerides(objectname, observatory_code,
                     discretetimes=[], 
                     airmass_lessthan=99, 
                     solar_elongation=[0,180], 
-                    skip_daylight=False):
+                    skip_daylight=False,
+                    print_url=False):
 
     """call HORIZONS website to obtain ephemerides 
 
@@ -127,7 +128,8 @@ def get_ephemerides(objectname, observatory_code,
     else:
         url = url + "&SKIP_DAYLT='NO'"
 
-    #print url
+    if print_url:
+        print url
 
     ### call HORIZONS 
     while True:
