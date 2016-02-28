@@ -1,14 +1,14 @@
-""" CALLHORIZONS - a python interface to JPL HORIZONS ephemerides and
-    orbital elements
+"""CALLHORIZONS - a Python 2.7 interface to access JPL HORIZONS
+ephemerides and orbital elements.
 
-    This module provides a convenient python interface to the JPL
-    HORIZONS system by directly accessing and parsing the HORIZONS
-    website. Ephemerides can be obtained through get_ephemerides,
-    orbital elements through get_elements. Function 
-    export2pyephem provides an interface to the PyEphem module.
+This module provides a convenient python interface to the JPL
+HORIZONS system by directly accessing and parsing the HORIZONS
+website. Ephemerides can be obtained through get_ephemerides,
+orbital elements through get_elements. Function 
+export2pyephem provides an interface to the PyEphem module.
 
-    michael.mommert@nau.edu, latest version: v0.9, 2016-02-27
-    This code is inspired by code created by Alex Hagen.
+michael.mommert (at) nau.edu, latest version: v0.9, 2016-02-27.
+This code is inspired by code created by Alex Hagen.
 
 """
 
@@ -23,15 +23,25 @@ class query():
 
     def __init__(self, targetname):
         """
-        initialize call
-        input: targetname (number, name, designation),
-               [designation=True if targetname is a designation],
+        Initialize query to Horizons 
+
+        Parameters
+        ----------
+        targetname         : str
+           HORIZONS-readable target number, name, or designation
+        
+        Results
+        -------
+        None
+
         """
+
+
         self.targetname    = targetname
-        self.start_time    = None
-        self.stop_time     = None
+        self.start_epoch    = None
+        self.stop_epoch     = None
         self.step_size     = None
-        self.discretetimes = None
+        self.discreteepochs = None
         self.url           = None 
         self.data          = None
 
@@ -39,49 +49,78 @@ class query():
         return None
 
 
-    ### set times
+    ### set epochs
 
-    def set_timerange(self, start_time, stop_time, step_size):
+    def set_epochrange(self, start_epoch, stop_epoch, step_size):
+        """Set a range of epochs, all times are UT
+
+        Parameters
+        ----------
+        start_epoch        :    str
+           start epoch of the format 'YYYY-MM-DD [HH-MM-SS]'
+        stop_epoch         :    str
+           final epoch of the format 'YYYY-MM-DD [HH-MM-SS]' 
+        step_size          :    str
+           epoch step size, e.g., '1d' for 1 day, '10m' for 10 minutes...
+
+        Returns
+        -------
+        None
+        
+        Examples
+        --------
+        >>> import callhorizons
+        >>> ceres = callhorizons.query('Ceres')
+        >>> ceres.set_epochrange('2016-02-26', '2016-10-25', '1d')
+
+        Note that dates are mandatory; if no time is given, midnight is assumed.
         """
-        set a time range
-        input: start_time (YYYY-MM-DD HH:MM), 
-               stop_time  (YYYY-MM-DD HH:MM), 
-               step_size  (#d/#h/#m...)
-        """
-        self.start_time = start_time
-        self.stop_time  = stop_time
+        self.start_epoch = start_epoch
+        self.stop_epoch  = stop_epoch
         self.step_size  = step_size
 
         return None
 
 
-    def set_discretetimes(self, discretetimes):
-        """
-        set discrete times
-        input: list of dates in JD
-        """
-        if type(discretetimes) is not list:
-            discretetimes = [discretetimes]
+    def set_discreteepochs(self, discreteepochs):
+        """Set a list of discrete epochs, epochs have to be given as Julian
+        Dates
 
-        self.discretetimes = discretetimes
+        Parameters
+        ----------
+        discreteepochs    : list
+           list of floats or strings, maximum length: 15
+
+        Returns
+        -------
+        None
+        
+        Examples
+        --------
+        >>> import callhorizons
+        >>> ceres = callhorizons.query('Ceres')
+        >>> ceres.set_discreteepochs([2457446.177083, 2457446.182343])
+        
+        If more than 15 epochs are provided, the list will be cropped to 15 epochs.
+        """
+        if type(discreteepochs) is not list:
+            discreteepochs = [discreteepochs]
+
+        self.discreteepochs = discreteepochs
 
 
     ### data access functions
 
     @property
     def fields(self):
-        """ 
-        return available fields in self.data
-        """
+        """returns list of available properties for all epochs"""
         try:
             return self.data.dtype.names
         except AttributeError:
             return []
 
     def __len__(self):
-        """
-        return number of dates queried
-        """
+        """returns total number of epochs that have been queried"""
         try:
             return self.data.shape[0]
         except AttributeError:
@@ -89,9 +128,7 @@ class query():
     
     @property
     def dates(self):
-        """
-        return dates for available ephemerides/elements
-        """
+        """returns list of epochs that have been queried (format 'YYYY-MM-DD HH-MM-SS')"""
         try:
             return self.data['datetime']
         except:
@@ -99,39 +136,43 @@ class query():
 
     @property
     def dates_jd(self):
-        """
-        return Julian Dates for available ephemerides/elements
-        """
+        """returns list of epochs that have been queried (Julian Dates)"""
         try:
             return self.data['datetime_jd']
         except:
             return []
 
     def __repr__(self):
-        """
-        provide brief query information
-        """
+        """returns brief query information"""
         return "<callhorizons.query object: %s>" % self.targetname
 
     def __str__(self):
-        """
-        provide information on the current query as string
-        """
+        """returns information on the current query as string"""
         output = "targetname: %s\n" % self.targetname
-        if self.discretetimes is not None:
-            output += "discrete times: %s\n" % " ".join(self.discretetimes)
-        if (self.start_time is not None and self.stop_time is not None and 
+        if self.discreteepochs is not None:
+            output += "discrete epochs: %s\n" % \
+                      " ".join([str(epoch) for epoch in self.discreteepochs])
+        if (self.start_epoch is not None and self.stop_epoch is not None and 
             self.step_size is not None):
-            output += "time range from %s to %s in steps of %s\n" % \
-                      (self.start_time, self.stop_time, self.step_size)
+            output += "epoch range from %s to %s in steps of %s\n" % \
+                      (self.start_epoch, self.stop_epoch, self.step_size)
         output += "%d data sets queried with %d different fields" % \
                   (len(self), len(self.fields))
         return output
 
 
     def __getitem__(self, key):
-        """ 
-        access self.data for given key (date_idx, date or parameter)
+        """provides access to query data
+
+        Parameters
+        ----------
+        key          : str/int 
+           epoch index or property key
+
+        Returns
+        -------
+        query data according to key
+
         """
 
         # check if data exist
@@ -140,35 +181,115 @@ class query():
                   'first'
             return None
 
-        # decide what to return
-        if type(key) == int:
-            return self.data[key]
-        elif 'datetime' in self.fields and key in self.data['datetime']:
-            return self.data[self.data['datetime'] == key]
-        elif 'datetime_jd' in self.fields and key in self.data['datetime_jd']:
-            return self.data[self.data['datetime_jd'] == key]
-        elif key in self.fields:
-            return self.data[key]
-        else:
-            print 'CALLHORIZONS ERROR: not sure what to return ' +\
-                  '(requested: %s)' % str(key)
+        return self.data[key]
+
 
 
     ### call functions
         
     def get_ephemerides(self, observatory_code, 
                         airmass_lessthan=99, 
-                        solar_elongation=[0,180], 
+                        solar_elongation=(0,180), 
                         skip_daylight=False):
-        """
-        call HORIZONS website to obtain ephemerides 
-        input: observatory_code (MPC observatory code),
-               [airmass_lessthan (max airmass)],
-               [solar_elongation (permissible range in deg)],
-               [skip_daylight (True/False)],
-        output: number of ephemerides queried
-        """
+        """Call JPL HORIZONS website to obtain ephemerides based on the
+        provided targetname, epochs, and observatory_code. For a list
+        of valid observatory codes, refer to
+        http://minorplanetcenter.net/iau/lists/ObsCodesF.html
+        
+        Parameters
+        ----------
+        observatory_code     : str/int
+           observer's location code according to Minor Planet Center
+        airmass_lessthan     : float
+           maximum airmass (optional, default: 99)
+        solar_elongation     : tuple
+           permissible solar elongation range (optional, deg)
+        skip_daylight        : boolean
+           crop daylight epoch during query (optional)
+        
+        Results
+        -------
+        number of epochs queried
+        
+        Examples
+        --------
+        >>> ceres = callhorizons.query('Ceres')
+        >>> ceres.set_epochrange('2016-02-23 00:00', '2016-02-24 00:00', '1h')
+        >>> print ceres.get_ephemerides(568), 'epochs queried'
 
+        The queried properties and their definitions are:
+           +------------------+-----------------------------------------------+
+           | Property         | Definition                                    |
+           +==================+===============================================+
+           | targetname       | official number, name, designation [string]   |
+           +------------------+-----------------------------------------------+
+           | H                | absolute magnitude in V band (float, mag)     |
+           +------------------+-----------------------------------------------+
+           | G                | photometric slope parameter (float)           |
+           +------------------+-----------------------------------------------+
+           | datetime         | epoch date and time (str, YYYY-MM-DD HH:MM:SS)|
+           +------------------+-----------------------------------------------+
+           | datetime_jd      | epoch Julian Date (float)                     |
+           +------------------+-----------------------------------------------+
+           | solar_presence   | information on Sun's presence (str)           |
+           +------------------+-----------------------------------------------+
+           | lunar_presence   | information on Moon's presence (str)          |
+           +------------------+-----------------------------------------------+
+           | RA               | target RA (float, J2000.0)                    |
+           +------------------+-----------------------------------------------+
+           | DEC              | target DEC (float, J2000.0)                   |
+           +------------------+-----------------------------------------------+
+           | RA_rate          | target rate RA (float, arcsec/s)              |
+           +------------------+-----------------------------------------------+
+           | DEC_rate         | target RA (float, arcsec/s, includes cos(DEC))|
+           +------------------+-----------------------------------------------+
+           | AZ               | Azimuth meas East(90) of North(0) (float, deg)|
+           +------------------+-----------------------------------------------+
+           | EL               | Elevation (float, deg)                        |
+           +------------------+-----------------------------------------------+
+           | airmass          | target optical airmass (float)                |
+           +------------------+-----------------------------------------------+
+           | magextinct       | V-mag extinction due airmass (float, mag)     |
+           +------------------+-----------------------------------------------+
+           | V                | V magnitude (comets: total mag) (float, mag)  |
+           +------------------+-----------------------------------------------+
+           | illumination     | fraction of illuminated disk (float)          |
+           +------------------+-----------------------------------------------+
+           | EclLon           | heliocentr. ecl. long. (float, deg, J2000.0)  |
+           +------------------+-----------------------------------------------+
+           | EclLat           | heliocentr. ecl. lat. (float, deg, J2000.0)   |
+           +------------------+-----------------------------------------------+
+           | r                | heliocentric distance (float, au)             |
+           +------------------+-----------------------------------------------+
+           | r_rate           | heliocentric radial rate  (float, km/s)       |
+           +------------------+-----------------------------------------------+
+           | delta            | distance from the observer (float, au)        |
+           +------------------+-----------------------------------------------+
+           | delta_rate       | obs-centric radial rate (float, km/s)         |
+           +------------------+-----------------------------------------------+
+           | lighttime        | one-way light time (float, s)                 |
+           +------------------+-----------------------------------------------+
+           | elong            | solar elongation (float, deg)                 |
+           +------------------+-----------------------------------------------+
+           | elongFlag        | app. position relative to Sun (str)           |
+           +------------------+-----------------------------------------------+
+           | alpha            | solar phase angle (float, deg)                |
+           +------------------+-----------------------------------------------+
+           | sunTargetPA      | PA of Sun->target vector (float, deg, EoN)    |
+           +------------------+-----------------------------------------------+
+           | velocityPA       | PA of velocity vector (float, deg, EoN)       |
+           +------------------+-----------------------------------------------+
+           | GlxLon           | galactic longitude (float, deg)               |
+           +------------------+-----------------------------------------------+
+           | GlxLat           | galactic latitude  (float, deg)               |
+           +------------------+-----------------------------------------------+
+           | RA_3sigma        | 3sigma pos. unc. in RA (float, arcsec)        |
+           +------------------+-----------------------------------------------+
+           | DEC_3sigma       | 3sigma pos. unc. in DEC (float, arcsec)       |
+           +------------------+-----------------------------------------------+
+
+        """
+        
         # queried fields (see HORIZONS website for details)
         # if fields are added here, also update the field identification below
         quantities = '1,3,4,8,9,10,18,19,20,21,23,24,27,33,36'
@@ -187,32 +308,36 @@ class query():
               + str(solar_elongation[1]) + "'" \
               + "&CENTER='"+str(observatory_code)+"'"
 
+        # check if self.targetname is a designation
         # lower case + upper case + numbers = pot. case sensitive designation
-        if (not self.targetname.isalpha() and not
-            self.targetname.isdigit() and not
-            self.targetname.islower() and not
-            self.targetname.isupper()):
-            url += "&COMMAND='DES=" + str(objectname) + "%3B'" 
+        if (not self.targetname.replace(' ', '').isalpha() and not
+             self.targetname.isdigit() and not
+             self.targetname.islower() and not
+             self.targetname.isupper()):
+            url += "&COMMAND='DES=" + \
+                   urllib2.quote(self.targetname.encode("utf8")) + "%3B'" 
         else:
-            url += "&COMMAND='" + str(objectname) + "%3B'" 
+            url += "&COMMAND='" + \
+                   urllib2.quote(self.targetname.encode("utf8")) + "%3B'" 
 
-        if self.discretetimes is not None: 
-            if len(self.discretetimes) > 15:
-                print 'CALLHORIZONS WARNING: more than 15 discrete times ' +\
+        if self.discreteepochs is not None: 
+            if len(self.discreteepochs) > 15:
+                print 'CALLHORIZONS WARNING: more than 15 discrete epochs ' +\
                     'provided; output may be truncated.'
             url += "&TLIST=" 
-            for date in self.discretetimes:
+            for date in self.discreteepochs:
                 url += "'" + str(date) + "'"
-        elif (self.start_time is not None and self.stop_time is not None and 
+        elif (self.start_epoch is not None and self.stop_epoch is not None and 
               self.step_size is not None):
             url +=  "&START_TIME='" \
-                    + urllib2.quote(self.start_time.encode("utf8")) + "'" \
+                    + urllib2.quote(self.start_epoch.encode("utf8")) + "'" \
                     + "&STOP_TIME='" \
-                    + urllib2.quote(self.stop_time.encode("utf8")) + "'" \
+                    + urllib2.quote(self.stop_epoch.encode("utf8")) + "'" \
                     + "&STEP_SIZE='" + str(self.step_size) + "'"
         else:
-            print 'CALLHORIZONS ERROR: no time information given'
-
+            print 'CALLHORIZONS ERROR: no epoch information given'
+            return 0
+            
         if airmass_lessthan < 99:
             url += "&AIRMASS='" + str(airmass_lessthan) + "'"
 
@@ -307,14 +432,14 @@ class query():
                         this_eph.append(float(line[idx])/3600.)  # "/s
                     except ValueError:
                         this_eph.append(numpy.nan)
-                    fieldnames.append('RArate')
+                    fieldnames.append('RA_rate')
                     datatypes.append(float)
                 if (item.find('d(DEC)/dt') > -1):
                     try:
                         this_eph.append(float(line[idx])/3600.)  # "/s
                     except ValueError:
                         this_eph.append(numpy.nan)
-                    fieldnames.append('DECrate')
+                    fieldnames.append('DEC_rate')
                     datatypes.append(float)
                 if (item.find('Azi_(a-app)') > -1):
                     try: # if AZ not given, e.g. for space telescopes
@@ -462,12 +587,61 @@ class query():
 
 
 
-    def get_elements(self, center='500@10', print_url=False):
-        """
-        call HORIZONS website to obtain orbital elements for different epochs
-        input: [center_code (if other than the Sun's center)]
-               [print_url (True/False)]
-        output: number of element sets queried
+    def get_elements(self, center='500@10'):
+        """Call JPL HORIZONS website to obtain orbital elements based on the
+        provided targetname, epochs, and center code. For valid center
+        codes, please refer to http://ssd.jpl.nasa.gov/horizons.cgi
+
+        Parameters
+        ----------
+        center        :  str
+           center body (default: 500@10 = Sun)
+
+        Results
+        -------
+        number of epochs queried
+        
+        Examples
+        --------
+        >>> ceres = callhorizons.query('Ceres')
+        >>> ceres.set_epochrange('2016-02-23 00:00', '2016-02-24 00:00', '1h')
+        >>> print ceres.get_elements(), 'epochs queried'
+
+        The queried properties and their definitions are:
+           +------------------+-----------------------------------------------+
+           | Property         | Definition                                    |
+           +==================+===============================================+
+           | targetname       | official number, name, designation [string]   |
+           +------------------+-----------------------------------------------+
+           | H                | absolute magnitude in V band (float, mag)     |
+           +------------------+-----------------------------------------------+
+           | G                | photometric slope parameter (float)           |
+           +------------------+-----------------------------------------------+
+           | datetime_jd      | epoch Julian Date (float)                     |
+           +------------------+-----------------------------------------------+
+           | e                | eccentricity (float)                          |
+           +------------------+-----------------------------------------------+
+           | p                | periapsis distance (float, au)                |
+           +------------------+-----------------------------------------------+
+           | a                | semi-major axis (float, au)                   |
+           +------------------+-----------------------------------------------+
+           | incl             | inclination (float, deg)                      |
+           +------------------+-----------------------------------------------+
+           | node             | longitude of Asc. Node (float, deg)           |
+           +------------------+-----------------------------------------------+
+           | argper           | argument of the perifocus (float, deg)        |
+           +------------------+-----------------------------------------------+
+           | Tp               | time of periapsis (float, Julian Date)        |
+           +------------------+-----------------------------------------------+
+           | meananomaly      | mean anomaly (float, deg)                     |
+           +------------------+-----------------------------------------------+
+           | trueanomaly      | true anomaly (float, deg)                     |
+           +------------------+-----------------------------------------------+
+           | period           | orbital period (float, Earth yr)              |
+           +------------------+-----------------------------------------------+
+           | Q                | apoapsis distance (float, au)                 |
+           +------------------+-----------------------------------------------+
+
         """
 
         # encode objectname for use in URL
@@ -486,33 +660,35 @@ class query():
               + "CSV_FORMAT='YES'" \
               + "&OBJ_DATA='YES'"
 
+        # check if self.targetname is a designation
         # lower case + upper case + numbers = pot. case sensitive designation
-        if (not self.targetname.isalpha() and not
-            self.targetname.isdigit() and not
-            self.targetname.islower() and not
-            self.targetname.isupper()):
+        if (not self.targetname.replace(' ', '').isalpha() and not
+             self.targetname.isdigit() and not
+             self.targetname.islower() and not
+             self.targetname.isupper()):
             url += "&COMMAND='DES=" + str(objectname) + "%3B'" 
         else:
             url += "&COMMAND='" + str(objectname) + "%3B'" 
 
 
-        if self.discretetimes is not None: 
-            if len(self.discretetimes) > 15:
-                print 'CALLHORIZONS WARNING: more than 15 discrete times ' +\
+        if self.discreteepochs is not None: 
+            if len(self.discreteepochs) > 15:
+                print 'CALLHORIZONS WARNING: more than 15 discrete epochs ' +\
                     'provided; output may be truncated.'
             url += "&TLIST=" 
-            for date in self.discretetimes:
+            for date in self.discreteepochs:
                 url += "'" + str(date) + "'"
-        elif (self.start_time is not None and self.stop_time is not None and 
+        elif (self.start_epoch is not None and self.stop_epoch is not None and 
               self.step_size is not None):
             url +=  "&START_TIME='" \
-                    + urllib2.quote(self.start_time.encode("utf8")) + "'" \
+                    + urllib2.quote(self.start_epoch.encode("utf8")) + "'" \
                     + "&STOP_TIME='" \
-                    + urllib2.quote(self.stop_time.encode("utf8")) + "'" \
+                    + urllib2.quote(self.stop_epoch.encode("utf8")) + "'" \
                     + "&STEP_SIZE='" + str(self.step_size) + "'"
         else:
-            print 'CALLHORIZONS ERROR: no time information given'
-
+            print 'CALLHORIZONS ERROR: no epoch information given'
+            return 0
+        
         self.url = url
 
 
@@ -637,14 +813,43 @@ class query():
 
 
     def export2pyephem(self, center='500@10', equinox=2000.):
-        """
-        obtain orbital elements and export them into pyephem objects 
-        (note: this function requires PyEphem to be installed)
+        """Call JPL HORIZONS website to obtain orbital elements based on the
+        provided targetname, epochs, and center code and create a
+        PyEphem (http://rhodesmill.org/pyephem/) object. This function
+        requires PyEphem to be installed.
         
-        input: [center_code (if other than the Sun's center)]
-        output:  array of pyephem objects for each time step
+        Parameters
+        ----------
+        center        : str
+           center body (default: 500@10 = Sun)
+        equinox       : float
+           equinox (default: 2000.0)
+
+        Results
+        -------
+        list of PyEphem objects, one per epoch
         
+        Examples
+        --------
+        >>> import callhorizons
+        >>> import numpy
+        >>> import ephem
+
+        >>> ceres = callhorizons.query('Ceres')
+        >>> ceres.set_epochrange('2016-02-23 00:00', '2016-02-24 00:00', '1h')
+        >>> ceres_pyephem = ceres.export2pyephem()
+
+        >>> nau = ephem.Observer() # setup observer site
+        >>> nau.lon = -111.653152/180.*numpy.pi
+        >>> nau.lat = 35.184108/180.*numpy.pi
+        >>> nau.elevation = 2100 # m
+        >>> nau.date = '2015/10/5 01:23' # UT 
+        >>> print 'next rising: %s' % nau.next_rising(ceres_pyephem[0])
+        >>> print 'next transit: %s' % nau.next_transit(ceres_pyephem[0])
+        >>> print 'next setting: %s' % nau.next_setting(ceres_pyephem[0])
+
         """
+
         try:
             import ephem
         except ImportError:
@@ -670,103 +875,5 @@ class query():
                                     el['H'], el['G'])))
     
         return objects
-
-
-
-
-
-    def whatis(self, key):
-        """
-        provides information on dictionary keys used in this module and
-        how they are implemented
-        """
-        try:
-            return {'datetime': 'YYYY-MM-DD HH-MM in UT [str]',
-                    'datetime_jd': 'Julian date [float]', 
-                    'solar_presence': 'information on Sun\'s presence [str]',
-                    'lunar_presence': 'information on Moon\'s presence [str]',
-                    'RA': 'right ascension (deg, J2000.0) [float]',
-                    'DEC': 'declination (deg, J2000.0) [float]',
-                    'RArate': 'RA rate (arcsec/sec, incl. cos DEC) [float]', 
-                    'DECrate': 'DEC rate (arcsec/sec) [float]',
-                    'AZ': 'azimuth meas. East (90) of North (0) (deg) [float]',
-                    'EL': 'elevation (deg) [float]',
-                    'airmass': 'optical airmass [float]',
-                    'magextinct': 'V-mag extinction due airmass (mag) [float]',
-                    'V': 'V magnitude (total mag for comets) [float]',
-                    'illumination': 'fraction of illuminated disk [float]',
-                    'EclLon': 'heliocentr. ecl. long. (deg, J2000.0) [float]',
-                    'EclLat': 'heliocentr. ecl. lat.  (deg, J2000.0) [float]',
-                    'r': 'heliocentric distance (au) [float]',
-                    'r_rate': 'heliocentric radial rate (km/s) [float]',
-                    'delta': 'distance from the observer (au) [float]',
-                    'delta_rate': 'obs.-centric radial rate (km/s) [float]',
-                    'lighttime': 'one-way light time (sec) [float]',
-                    'elong': 'solar elongation (deg) [float]', 
-                    'elongFlag': 'app. position relative to the Sun [string]',
-                    'alpha': 'solar phase angle (deg) [float]',
-                    'sunTargetPA': ('PA of Sun->target vector (deg, EoN) ' \
-                                    + '[float]'),
-                    'velocityPA': ('PA of velocity vector (deg, EoN) ' \
-                                   + '[float]'),
-                    'GlxLon': 'galactic longitude (deg) [float]',
-                    'GlxLat': 'galactic latitude (deg) [float]',
-                    'RA_3sigma': '3sigma pos. unc. in RA (arcsec) [float]',
-                    'DEC_3sigma': '3sigma pos. unc. in DEC (arcsec) [float]',
-                    'targetname': 'official number, name, designation [string]',
-                    'H': 'absolute magnitude in V band (mag) [float]',
-                    'G': 'photometric slope parameter [float]',
-                    'e': 'eccentricity [float]',
-                    'p': 'periapsis distance (au) [float]',
-                    'a': 'semi-major axis (au) [float]',
-                    'incl': 'inclination (deg) [float]',
-                    'node': 'longitude of Asc. Node (deg) [float]',
-                    'argper': 'argument of perifocus (deg) [float]',
-                    'Tp': 'time of periapsis (Julian date) [float]',
-                    'meananomaly': 'mean anomaly (deg) [float]',
-                    'trueanomaly': 'true anomaly (deg) [float]',
-                    'period': 'orbital period (Earth yr) [float]',
-                    'Q': 'apoapsis distance (au) [float]'
-                }[key]
-        except KeyError:
-            return "don't know key '%s'" % key
-
-
-
-
-
-##### Example Code (just uncomment some of the following lines)
-
-# import callhorizons
-
-# # obtain ephemerides for Ceres
-# ceres = callhorizons.query('Ceres')
-# ceres.set_timerange('2016-02-23 00:00', '2016-02-24 00:00', '1h')
-# print ceres.get_ephemerides(568)
-
-# print ceres
-# print ceres.fields
-# print ceres.dates[ceres['solar_presence'] == 'dark']
-# print ceres.whatis('solar_presence')
-
-# # obtain orbital elements for Ceres
-# print ceres.get_elements()
-# print ceres.fields
-# print ceres.dates_jd
-
-# # export orbital elements for Ceres to PyEphem and use it to
-# # determine rise, transit, and set times
-# ceres_pyephem = ceres.export2pyephem()
-
-# # PyEphem code (see http://rhodesmill.org/pyephem/quick.html)
-# import ephem
-# nau = ephem.Observer() # setup observer site
-# nau.lon = -111.653152/180.*numpy.pi
-# nau.lat = 35.184108/180.*numpy.pi
-# nau.elevation = 2100 # m
-# nau.date = '2015/10/5 01:23' # UT 
-# print ('next rise: %s\n' % nau.next_rising(ceres_pyephem[0])), \
-#     ('next transit: %s\n' % nau.next_transit(ceres_pyephem[0])), \
-#     ('next setting: %s' % nau.next_setting(ceres_pyephem[0]))
 
 
