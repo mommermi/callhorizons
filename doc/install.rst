@@ -1,6 +1,14 @@
 Installation
 ------------
 
+PIP
+~~~
+
+Using PIP, simply call::
+
+  pip install callhorizons
+
+
 GitHub
 ~~~~~~
 

@@ -19,13 +19,13 @@ The easiest way is to install the module using pip::
 
   pip install callhorizons
 
-For other ways, see the documentation.
+For other ways, see the `documentation`_.
 
 
 Documentation
 -------------
 
-The CALLHORIZONS documentation is available at https://github.com/mommermi/callhorizons/doc/_build/html/readme.html
+The CALLHORIZONS documentation is available at http://mommermi.github.io/callhorizons/readme.html 
 
 
 Examples
@@ -40,7 +40,7 @@ Examples
     eros.get_ephemerides(568)
     print eros['RA'], eros['DEC']
 
-For more examples, see the documentation.
+For more examples, see the `documentation`_.
     
 
 License
@@ -69,3 +69,5 @@ Changelog
   (requires PyEphem: http://rhodesmill.org/pyephem/)
 
 * 2016-02-27: changed structure into class structure, created pip installer
+
+.. _documentation: http://mommermi.github.io/callhorizons/readme.html
