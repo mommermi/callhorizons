@@ -15,13 +15,17 @@ calculations on your machine.
 Installation
 ------------
 
-use pip (TBD)
+The easiest way is to install the module using pip::
+
+  pip install callhorizons
+
+For other ways, see the documentation.
 
 
 Documentation
 -------------
 
-The CALLHORIZONS documentation is available at XXX (TBD)
+The CALLHORIZONS documentation is available at https://github.com/mommermi/callhorizons/doc/_build/html/readme.html
 
 
 Examples
@@ -36,6 +40,7 @@ Examples
     eros.get_ephemerides(568)
     print eros['RA'], eros['DEC']
 
+For more examples, see the documentation.
     
 
 License
