@@ -127,6 +127,12 @@ class query():
             return 0
     
     @property
+    def data(self):
+        """returns full data array (structured numpy.ndarray)"""
+        return self.data
+
+
+    @property
     def dates(self):
         """returns list of epochs that have been queried (format 'YYYY-MM-DD HH-MM-SS')"""
         try:
@@ -210,6 +216,10 @@ class query():
         Results
         -------
         number of epochs queried
+
+        Queried data are stored in an internal structured
+        numpy.ndarray; this array can be accessed through the __getitem__
+        function or through the query.data attribute.
         
         Examples
         --------

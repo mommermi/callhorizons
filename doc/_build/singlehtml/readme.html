@@ -190,7 +190,460 @@ set an airmass limit during the query:</p>
 <div class="toctree-wrapper compound">
 <span id="document-callhorizons"></span><div class="section" id="callhorizons-module">
 <h3>callhorizons module<a class="headerlink" href="#callhorizons-module" title="Permalink to this headline">¶</a></h3>
-<span class="target" id="module-callhorizons"><span id="reference"></span></span><p>__init__ file for CALLHORIZONS module</p>
+<span class="target" id="module-callhorizons"><span id="reference"></span></span><p>CALLHORIZONS - a Python 2.7 interface to access JPL HORIZONS
+ephemerides and orbital elements.</p>
+<p>This module provides a convenient python interface to the JPL
+HORIZONS system by directly accessing and parsing the HORIZONS
+website. Ephemerides can be obtained through get_ephemerides,
+orbital elements through get_elements. Function 
+export2pyephem provides an interface to the PyEphem module.</p>
+<p>michael.mommert (at) nau.edu, latest version: v0.9, 2016-02-27.
+This code is inspired by code created by Alex Hagen.</p>
+<dl class="class">
+<dt id="callhorizons.query">
+<em class="property">class </em><code class="descclassname">callhorizons.</code><code class="descname">query</code><span class="sig-paren">(</span><em>targetname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/callhorizons.html#query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#callhorizons.query" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="callhorizons.query.__getitem__">
+<code class="descname">__getitem__</code><span class="sig-paren">(</span><em>key</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/callhorizons.html#query.__getitem__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#callhorizons.query.__getitem__" title="Permalink to this definition">¶</a></dt>
+<dd><p>provides access to query data</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>key</strong> : str/int</p>
+<blockquote>
+<div><p>epoch index or property key</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">query data according to key</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="callhorizons.query.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>targetname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/callhorizons.html#query.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#callhorizons.query.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize query to Horizons</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>targetname</strong> : str</p>
+<blockquote class="last">
+<div><p>HORIZONS-readable target number, name, or designation</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="callhorizons.query.__len__">
+<code class="descname">__len__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/callhorizons.html#query.__len__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#callhorizons.query.__len__" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns total number of epochs that have been queried</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="callhorizons.query.__module__">
+<code class="descname">__module__</code><em class="property"> = 'callhorizons'</em><a class="headerlink" href="#callhorizons.query.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="callhorizons.query.__repr__">
+<code class="descname">__repr__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/callhorizons.html#query.__repr__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#callhorizons.query.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns brief query information</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="callhorizons.query.__str__">
+<code class="descname">__str__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/callhorizons.html#query.__str__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#callhorizons.query.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns information on the current query as string</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="callhorizons.query.data">
+<code class="descname">data</code><a class="headerlink" href="#callhorizons.query.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns full data array (structured numpy.ndarray)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="callhorizons.query.dates">
+<code class="descname">dates</code><a class="headerlink" href="#callhorizons.query.dates" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns list of epochs that have been queried (format &#8216;YYYY-MM-DD HH-MM-SS&#8217;)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="callhorizons.query.dates_jd">
+<code class="descname">dates_jd</code><a class="headerlink" href="#callhorizons.query.dates_jd" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns list of epochs that have been queried (Julian Dates)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="callhorizons.query.export2pyephem">
+<code class="descname">export2pyephem</code><span class="sig-paren">(</span><em>center='500&#64;10'</em>, <em>equinox=2000.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/callhorizons.html#query.export2pyephem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#callhorizons.query.export2pyephem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call JPL HORIZONS website to obtain orbital elements based on the
+provided targetname, epochs, and center code and create a
+PyEphem (<a class="reference external" href="http://rhodesmill.org/pyephem/">http://rhodesmill.org/pyephem/</a>) object. This function
+requires PyEphem to be installed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>center</strong> : str</p>
+<blockquote>
+<div><p>center body (default: <a class="reference external" href="mailto:500&#37;&#52;&#48;10">500<span>&#64;</span>10</a> = Sun)</p>
+</div></blockquote>
+<p><strong>equinox</strong> : float</p>
+<blockquote class="last">
+<div><p>equinox (default: 2000.0)</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">callhorizons</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">ephem</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ceres</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;Ceres&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ceres</span><span class="o">.</span><span class="n">set_epochrange</span><span class="p">(</span><span class="s1">&#39;2016-02-23 00:00&#39;</span><span class="p">,</span> <span class="s1">&#39;2016-02-24 00:00&#39;</span><span class="p">,</span> <span class="s1">&#39;1h&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ceres_pyephem</span> <span class="o">=</span> <span class="n">ceres</span><span class="o">.</span><span class="n">export2pyephem</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">nau</span> <span class="o">=</span> <span class="n">ephem</span><span class="o">.</span><span class="n">Observer</span><span class="p">()</span> <span class="c1"># setup observer site</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nau</span><span class="o">.</span><span class="n">lon</span> <span class="o">=</span> <span class="o">-</span><span class="mf">111.653152</span><span class="o">/</span><span class="mf">180.</span><span class="o">*</span><span class="n">numpy</span><span class="o">.</span><span class="n">pi</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nau</span><span class="o">.</span><span class="n">lat</span> <span class="o">=</span> <span class="mf">35.184108</span><span class="o">/</span><span class="mf">180.</span><span class="o">*</span><span class="n">numpy</span><span class="o">.</span><span class="n">pi</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nau</span><span class="o">.</span><span class="n">elevation</span> <span class="o">=</span> <span class="mi">2100</span> <span class="c1"># m</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nau</span><span class="o">.</span><span class="n">date</span> <span class="o">=</span> <span class="s1">&#39;2015/10/5 01:23&#39;</span> <span class="c1"># UT </span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s1">&#39;next rising: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nau</span><span class="o">.</span><span class="n">next_rising</span><span class="p">(</span><span class="n">ceres_pyephem</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s1">&#39;next transit: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nau</span><span class="o">.</span><span class="n">next_transit</span><span class="p">(</span><span class="n">ceres_pyephem</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s1">&#39;next setting: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nau</span><span class="o">.</span><span class="n">next_setting</span><span class="p">(</span><span class="n">ceres_pyephem</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="callhorizons.query.fields">
+<code class="descname">fields</code><a class="headerlink" href="#callhorizons.query.fields" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns list of available properties for all epochs</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="callhorizons.query.get_elements">
+<code class="descname">get_elements</code><span class="sig-paren">(</span><em>center='500&#64;10'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/callhorizons.html#query.get_elements"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#callhorizons.query.get_elements" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call JPL HORIZONS website to obtain orbital elements based on the
+provided targetname, epochs, and center code. For valid center
+codes, please refer to <a class="reference external" href="http://ssd.jpl.nasa.gov/horizons.cgi">http://ssd.jpl.nasa.gov/horizons.cgi</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>center</strong> :  str</p>
+<blockquote class="last">
+<div><p>center body (default: <a class="reference external" href="mailto:500&#37;&#52;&#48;10">500<span>&#64;</span>10</a> = Sun)</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ceres</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;Ceres&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ceres</span><span class="o">.</span><span class="n">set_epochrange</span><span class="p">(</span><span class="s1">&#39;2016-02-23 00:00&#39;</span><span class="p">,</span> <span class="s1">&#39;2016-02-24 00:00&#39;</span><span class="p">,</span> <span class="s1">&#39;1h&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">ceres</span><span class="o">.</span><span class="n">get_elements</span><span class="p">(),</span> <span class="s1">&#39;epochs queried&#39;</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>The queried properties and their definitions are:</dt>
+<dd><table border="1" class="first last docutils">
+<colgroup>
+<col width="28%" />
+<col width="72%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Property</th>
+<th class="head">Definition</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>targetname</td>
+<td>official number, name, designation [string]</td>
+</tr>
+<tr class="row-odd"><td>H</td>
+<td>absolute magnitude in V band (float, mag)</td>
+</tr>
+<tr class="row-even"><td>G</td>
+<td>photometric slope parameter (float)</td>
+</tr>
+<tr class="row-odd"><td>datetime_jd</td>
+<td>epoch Julian Date (float)</td>
+</tr>
+<tr class="row-even"><td>e</td>
+<td>eccentricity (float)</td>
+</tr>
+<tr class="row-odd"><td>p</td>
+<td>periapsis distance (float, au)</td>
+</tr>
+<tr class="row-even"><td>a</td>
+<td>semi-major axis (float, au)</td>
+</tr>
+<tr class="row-odd"><td>incl</td>
+<td>inclination (float, deg)</td>
+</tr>
+<tr class="row-even"><td>node</td>
+<td>longitude of Asc. Node (float, deg)</td>
+</tr>
+<tr class="row-odd"><td>argper</td>
+<td>argument of the perifocus (float, deg)</td>
+</tr>
+<tr class="row-even"><td>Tp</td>
+<td>time of periapsis (float, Julian Date)</td>
+</tr>
+<tr class="row-odd"><td>meananomaly</td>
+<td>mean anomaly (float, deg)</td>
+</tr>
+<tr class="row-even"><td>trueanomaly</td>
+<td>true anomaly (float, deg)</td>
+</tr>
+<tr class="row-odd"><td>period</td>
+<td>orbital period (float, Earth yr)</td>
+</tr>
+<tr class="row-even"><td>Q</td>
+<td>apoapsis distance (float, au)</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="callhorizons.query.get_ephemerides">
+<code class="descname">get_ephemerides</code><span class="sig-paren">(</span><em>observatory_code</em>, <em>airmass_lessthan=99</em>, <em>solar_elongation=(0</em>, <em>180)</em>, <em>skip_daylight=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/callhorizons.html#query.get_ephemerides"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#callhorizons.query.get_ephemerides" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call JPL HORIZONS website to obtain ephemerides based on the
+provided targetname, epochs, and observatory_code. For a list
+of valid observatory codes, refer to
+<a class="reference external" href="http://minorplanetcenter.net/iau/lists/ObsCodesF.html">http://minorplanetcenter.net/iau/lists/ObsCodesF.html</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>observatory_code</strong> : str/int</p>
+<blockquote>
+<div><p>observer&#8217;s location code according to Minor Planet Center</p>
+</div></blockquote>
+<p><strong>airmass_lessthan</strong> : float</p>
+<blockquote>
+<div><p>maximum airmass (optional, default: 99)</p>
+</div></blockquote>
+<p><strong>solar_elongation</strong> : tuple</p>
+<blockquote>
+<div><p>permissible solar elongation range (optional, deg)</p>
+</div></blockquote>
+<p><strong>skip_daylight</strong> : boolean</p>
+<blockquote class="last">
+<div><p>crop daylight epoch during query (optional)</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ceres</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;Ceres&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ceres</span><span class="o">.</span><span class="n">set_epochrange</span><span class="p">(</span><span class="s1">&#39;2016-02-23 00:00&#39;</span><span class="p">,</span> <span class="s1">&#39;2016-02-24 00:00&#39;</span><span class="p">,</span> <span class="s1">&#39;1h&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">ceres</span><span class="o">.</span><span class="n">get_ephemerides</span><span class="p">(</span><span class="mi">568</span><span class="p">),</span> <span class="s1">&#39;epochs queried&#39;</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>The queried properties and their definitions are:</dt>
+<dd><table border="1" class="first last docutils">
+<colgroup>
+<col width="28%" />
+<col width="72%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Property</th>
+<th class="head">Definition</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>targetname</td>
+<td>official number, name, designation [string]</td>
+</tr>
+<tr class="row-odd"><td>H</td>
+<td>absolute magnitude in V band (float, mag)</td>
+</tr>
+<tr class="row-even"><td>G</td>
+<td>photometric slope parameter (float)</td>
+</tr>
+<tr class="row-odd"><td>datetime</td>
+<td>epoch date and time (str, YYYY-MM-DD HH:MM:SS)</td>
+</tr>
+<tr class="row-even"><td>datetime_jd</td>
+<td>epoch Julian Date (float)</td>
+</tr>
+<tr class="row-odd"><td>solar_presence</td>
+<td>information on Sun&#8217;s presence (str)</td>
+</tr>
+<tr class="row-even"><td>lunar_presence</td>
+<td>information on Moon&#8217;s presence (str)</td>
+</tr>
+<tr class="row-odd"><td>RA</td>
+<td>target RA (float, J2000.0)</td>
+</tr>
+<tr class="row-even"><td>DEC</td>
+<td>target DEC (float, J2000.0)</td>
+</tr>
+<tr class="row-odd"><td>RA_rate</td>
+<td>target rate RA (float, arcsec/s)</td>
+</tr>
+<tr class="row-even"><td>DEC_rate</td>
+<td>target RA (float, arcsec/s, includes cos(DEC))</td>
+</tr>
+<tr class="row-odd"><td>AZ</td>
+<td>Azimuth meas East(90) of North(0) (float, deg)</td>
+</tr>
+<tr class="row-even"><td>EL</td>
+<td>Elevation (float, deg)</td>
+</tr>
+<tr class="row-odd"><td>airmass</td>
+<td>target optical airmass (float)</td>
+</tr>
+<tr class="row-even"><td>magextinct</td>
+<td>V-mag extinction due airmass (float, mag)</td>
+</tr>
+<tr class="row-odd"><td>V</td>
+<td>V magnitude (comets: total mag) (float, mag)</td>
+</tr>
+<tr class="row-even"><td>illumination</td>
+<td>fraction of illuminated disk (float)</td>
+</tr>
+<tr class="row-odd"><td>EclLon</td>
+<td>heliocentr. ecl. long. (float, deg, J2000.0)</td>
+</tr>
+<tr class="row-even"><td>EclLat</td>
+<td>heliocentr. ecl. lat. (float, deg, J2000.0)</td>
+</tr>
+<tr class="row-odd"><td>r</td>
+<td>heliocentric distance (float, au)</td>
+</tr>
+<tr class="row-even"><td>r_rate</td>
+<td>heliocentric radial rate  (float, km/s)</td>
+</tr>
+<tr class="row-odd"><td>delta</td>
+<td>distance from the observer (float, au)</td>
+</tr>
+<tr class="row-even"><td>delta_rate</td>
+<td>obs-centric radial rate (float, km/s)</td>
+</tr>
+<tr class="row-odd"><td>lighttime</td>
+<td>one-way light time (float, s)</td>
+</tr>
+<tr class="row-even"><td>elong</td>
+<td>solar elongation (float, deg)</td>
+</tr>
+<tr class="row-odd"><td>elongFlag</td>
+<td>app. position relative to Sun (str)</td>
+</tr>
+<tr class="row-even"><td>alpha</td>
+<td>solar phase angle (float, deg)</td>
+</tr>
+<tr class="row-odd"><td>sunTargetPA</td>
+<td>PA of Sun-&gt;target vector (float, deg, EoN)</td>
+</tr>
+<tr class="row-even"><td>velocityPA</td>
+<td>PA of velocity vector (float, deg, EoN)</td>
+</tr>
+<tr class="row-odd"><td>GlxLon</td>
+<td>galactic longitude (float, deg)</td>
+</tr>
+<tr class="row-even"><td>GlxLat</td>
+<td>galactic latitude  (float, deg)</td>
+</tr>
+<tr class="row-odd"><td>RA_3sigma</td>
+<td>3sigma pos. unc. in RA (float, arcsec)</td>
+</tr>
+<tr class="row-even"><td>DEC_3sigma</td>
+<td>3sigma pos. unc. in DEC (float, arcsec)</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="callhorizons.query.set_discreteepochs">
+<code class="descname">set_discreteepochs</code><span class="sig-paren">(</span><em>discreteepochs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/callhorizons.html#query.set_discreteepochs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#callhorizons.query.set_discreteepochs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set a list of discrete epochs, epochs have to be given as Julian
+Dates</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>discreteepochs</strong> : list</p>
+<blockquote>
+<div><p>list of floats or strings, maximum length: 15</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">callhorizons</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ceres</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;Ceres&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ceres</span><span class="o">.</span><span class="n">set_discreteepochs</span><span class="p">([</span><span class="mf">2457446.177083</span><span class="p">,</span> <span class="mf">2457446.182343</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>If more than 15 epochs are provided, the list will be cropped to 15 epochs.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="callhorizons.query.set_epochrange">
+<code class="descname">set_epochrange</code><span class="sig-paren">(</span><em>start_epoch</em>, <em>stop_epoch</em>, <em>step_size</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/callhorizons.html#query.set_epochrange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#callhorizons.query.set_epochrange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set a range of epochs, all times are UT</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>start_epoch</strong> :    str</p>
+<blockquote>
+<div><p>start epoch of the format &#8216;YYYY-MM-DD [HH-MM-SS]&#8217;</p>
+</div></blockquote>
+<p><strong>stop_epoch</strong> :    str</p>
+<blockquote>
+<div><p>final epoch of the format &#8216;YYYY-MM-DD [HH-MM-SS]&#8217;</p>
+</div></blockquote>
+<p><strong>step_size</strong> :    str</p>
+<blockquote>
+<div><p>epoch step size, e.g., &#8216;1d&#8217; for 1 day, &#8216;10m&#8217; for 10 minutes...</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">callhorizons</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ceres</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;Ceres&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ceres</span><span class="o">.</span><span class="n">set_epochrange</span><span class="p">(</span><span class="s1">&#39;2016-02-26&#39;</span><span class="p">,</span> <span class="s1">&#39;2016-10-25&#39;</span><span class="p">,</span> <span class="s1">&#39;1d&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Note that dates are mandatory; if no time is given, midnight is assumed.</p>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 </div>
 </div>
