@@ -11,6 +11,7 @@ setup(
     license = "MIT",
     keywords = "solar system, ephemerides, ephemeris, orbital elements, pyephem",
     url = "https://github.com/mommermi/callhorizons",
+    packages=['callhorizons'],
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Science/Research",

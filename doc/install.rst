@@ -16,11 +16,11 @@ Using git, simply clone the code from GitHub::
 
   git clone https://github.com/mommermi/callhorizons
 
-or, download and unpack a zip file with all the files from `GitHub`_.
+or, download and unpack the zip file with all the files from `GitHub`_
+and then run from the callhorizons directory::
 
-In order to be able to use CALLHORIZONS from anywhere on your system,
-you have to add the directory where the downloaded files reside to
-your ``PYTHONPATH`` system variable.
+  python setup.py install
+
 
 
 .. _GitHub: https://github.com/mommermi/callhorizons
