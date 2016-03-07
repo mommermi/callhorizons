@@ -348,7 +348,7 @@ class query():
 
         self.url = url
 
-        print url
+        #print url
 
         ### call HORIZONS 
         while True:
