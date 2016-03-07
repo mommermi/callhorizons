@@ -127,12 +127,6 @@ class query():
             return 0
     
     @property
-    def data(self):
-        """returns full data array (structured numpy.ndarray)"""
-        return self.data
-
-
-    @property
     def dates(self):
         """returns list of epochs that have been queried (format 'YYYY-MM-DD HH-MM-SS')"""
         try:
@@ -216,10 +210,6 @@ class query():
         Results
         -------
         number of epochs queried
-
-        Queried data are stored in an internal structured
-        numpy.ndarray; this array can be accessed through the __getitem__
-        function or through the query.data attribute.
         
         Examples
         --------
@@ -358,6 +348,7 @@ class query():
 
         self.url = url
 
+        print url
 
         ### call HORIZONS 
         while True:
@@ -520,11 +511,22 @@ class query():
                     this_eph.append(float(line[idx]))
                     fieldnames.append('elong')
                     datatypes.append(float)
-                if (item.find('S-T-O') > -1):
+                # in the case of space telescopes, '/r     S-T-O' is used;
+                # ground-based telescopes have both parameters in separate
+                # columns
+                if (item.find('/r    S-T-O') > -1):
+                    this_eph.append({'/L':'leading', '/T':'trailing'}\
+                                    [line[idx].split()[0]])
+                    fieldnames.append('elongFlag')
+                    datatypes.append(object)
+                    this_eph.append(float(line[idx].split()[1]))
+                    fieldnames.append('alpha')
+                    datatypes.append(float)
+                elif (item.find('S-T-O') > -1):
                     this_eph.append(float(line[idx]))
                     fieldnames.append('alpha')
                     datatypes.append(float)
-                if (item.find('/r') > -1):
+                elif (item.find('/r') > -1):
                     this_eph.append({'/L':'leading', '/T':'trailing'}\
                                     [line[idx]])
                     fieldnames.append('elongFlag')
