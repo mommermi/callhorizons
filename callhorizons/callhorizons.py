@@ -410,14 +410,22 @@ class query():
                     fieldnames.append('datetime_jd')
                     datatypes.append(float)
                     # read out and convert solar presence
-                    this_eph.append({'*':'daylight', 'C':'civil twilight',
-                                     'N':'nautical twilight',
-                                     'A':'astronomical twilight',
-                                     ' ':'dark'}[line[idx+1]])
+                    try:
+                        this_eph.append({'*':'daylight', 'C':'civil twilight',
+                                         'N':'nautical twilight',
+                                         'A':'astronomical twilight',
+                                         ' ':'dark',
+                                         't':'transiting'}[line[idx+1]])
+                    except KeyError:
+                        this_eph.append('n.a.')
                     fieldnames.append('solar_presence')
                     datatypes.append(object)
                     # read out and convert lunar presence
-                    this_eph.append({'m':'moonlight', ' ':'dark'}[line[idx+2]])
+                    try:
+                        this_eph.append({'m':'moonlight',
+                                         ' ':'dark'}[line[idx+2]])
+                    except KeyError:
+                        this_eph.append('n.a.')
                     fieldnames.append('lunar_presence')
                     datatypes.append(object)
                 if (item.find('R.A._(ICRF/J2000.0)') > -1):
@@ -563,7 +571,10 @@ class query():
                     datatypes.append(float)
                 # in the case of a comet, use total mag for V
                 if (item.find('T-mag') > -1):
-                    this_eph.append(float(line[idx]))
+                    try:
+                        this_eph.append(float(line[idx]))
+                    except ValueError:
+                        this_eph.append(numpy.nan)
                     fieldnames.append('V')
                     datatypes.append(float)
             # append target name
