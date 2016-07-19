@@ -1,0 +1,165 @@
+
+
+<!doctype html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Examples &mdash; CALLHORIZONS 0.9 documentation</title>
+    
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/bizstyle.js"></script>
+    <link rel="top" title="CALLHORIZONS 0.9 documentation" href="readme.html" />
+    <link rel="next" title="callhorizons" href="modules.html" />
+    <link rel="prev" title="How to Use It?" href="use.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="modules.html" title="callhorizons"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="use.html" title="How to Use It?"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="readme.html">CALLHORIZONS 0.9 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="use.html"
+                        title="previous chapter">How to Use It?</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="modules.html"
+                        title="next chapter">callhorizons</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/examples.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="examples">
+<span id="id1"></span><h1>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h1>
+<ol class="arabic">
+<li><p class="first">Find the hours on the night of 2015-10-25 (UT) when Centaur
+Echeclus is observable with airmass &lt; 1.5 from Mauna Kea
+(observatory code: 568) during dark time:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">callhorizons</span>
+<span class="n">echeclus</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;echeclus&#39;</span><span class="p">)</span>
+<span class="n">echeclus</span><span class="o">.</span><span class="n">set_epochrange</span><span class="p">(</span><span class="s1">&#39;2015-10-25&#39;</span><span class="p">,</span> <span class="s1">&#39;2015-10-26&#39;</span><span class="p">,</span> <span class="s1">&#39;1h&#39;</span><span class="p">)</span>
+<span class="n">echeclus</span><span class="o">.</span><span class="n">get_ephemerides</span><span class="p">(</span><span class="mi">568</span><span class="p">)</span>
+<span class="k">print</span> <span class="n">echeclus</span><span class="p">[(</span><span class="n">echeclus</span><span class="p">[</span><span class="s1">&#39;solar_presence&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;daylight&#39;</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">echeclus</span><span class="p">[</span><span class="s1">&#39;airmass&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">1.5</span><span class="p">)][</span><span class="s1">&#39;datetime&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Note: you can also use HORIZONS&#8217; own <code class="docutils literal"><span class="pre">skip</span> <span class="pre">daylight</span></code> function and
+set an airmass limit during the query:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">echeclus</span><span class="o">.</span><span class="n">get_ephemerides</span><span class="p">(</span><span class="mi">568</span><span class="p">,</span> <span class="n">skip_daylight</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">airmass_lessthan</span><span class="o">=</span><span class="mf">1.5</span><span class="p">)</span>
+<span class="k">print</span> <span class="n">echeclus</span><span class="p">[</span><span class="s1">&#39;datetime&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Pull the orbital elements of Saturn on a specific date:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">callhorizons</span>
+<span class="n">saturn</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;Saturn&#39;</span><span class="p">,</span> <span class="n">smallbody</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="n">saturn</span><span class="o">.</span><span class="n">set_discreteepochs</span><span class="p">(</span><span class="s1">&#39;2451234.5&#39;</span><span class="p">)</span>
+<span class="n">saturn</span><span class="o">.</span><span class="n">get_elements</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This will cause a <code class="docutils literal"><span class="pre">ValueError:</span> <span class="pre">Ambiguous</span> <span class="pre">target</span> <span class="pre">name;</span> <span class="pre">check</span> <span class="pre">URL:</span>
+<span class="pre">...</span></code>. Why did that happen? Check out the URL that is provided
+with the error message; it will tell you the reason. The target
+name is ambiguous, since there is (the center of) Saturn and the
+barycenter of the Saturn system. If you are interested in the
+planet, use the ID number (699) instead of the planets name:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">callhorizons</span>
+<span class="n">saturn</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;699&#39;</span><span class="p">,</span> <span class="n">smallbody</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="n">saturn</span><span class="o">.</span><span class="n">set_discreteepochs</span><span class="p">(</span><span class="s1">&#39;2451234.5&#39;</span><span class="p">)</span>
+<span class="n">saturn</span><span class="o">.</span><span class="n">get_elements</span><span class="p">()</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">more examples will come in the future ... (what are you interested in?)</p>
+</li>
+</ol>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="modules.html" title="callhorizons"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="use.html" title="How to Use It?"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="readme.html">CALLHORIZONS 0.9 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Michael Mommert.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.5.
+    </div>
+  </body>
+</html>

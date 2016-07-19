@@ -4,12 +4,12 @@ from setuptools import setup
 
 setup(
     name = "CALLHORIZONS",
-    version = "0.9.8",
+    version = "1.0.0",
     author = "Michael Mommert",
     author_email = "michael.mommert (at) nau.edu",
     description = "CALLHORIZONS is a Python 2.7 interface to access JPL HORIZONS ephemerides and orbital elements of Solar System bodies.",
     license = "MIT",
-    keywords = "solar system, ephemerides, ephemeris, orbital elements, pyephem",
+    keywords = "solar system, ephemerides, ephemeris, orbital elements, pyephem, asteroids, planets, spacecraft",
     url = "https://github.com/mommermi/callhorizons",
     packages=['callhorizons'],
     classifiers=[

@@ -1,0 +1,1084 @@
+
+
+<!doctype html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>callhorizons &mdash; CALLHORIZONS 0.9 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/bizstyle.js"></script>
+    <link rel="top" title="CALLHORIZONS 0.9 documentation" href="../readme.html" />
+    <link rel="up" title="Module code" href="index.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../readme.html">CALLHORIZONS 0.9 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for callhorizons</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;CALLHORIZONS - a Python 2.7 interface to access JPL HORIZONS</span>
+<span class="sd">ephemerides and orbital elements.</span>
+
+<span class="sd">This module provides a convenient python interface to the JPL</span>
+<span class="sd">HORIZONS system by directly accessing and parsing the HORIZONS</span>
+<span class="sd">website. Ephemerides can be obtained through get_ephemerides,</span>
+<span class="sd">orbital elements through get_elements. Function </span>
+<span class="sd">export2pyephem provides an interface to the PyEphem module.</span>
+
+<span class="sd">michael.mommert (at) nau.edu, latest version: v1.0, 2016-07-19.</span>
+<span class="sd">This code is inspired by code created by Alex Hagen.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">urllib2</span>
+
+
+<div class="viewcode-block" id="query"><a class="viewcode-back" href="../callhorizons.html#callhorizons.query">[docs]</a><span class="k">class</span> <span class="nc">query</span><span class="p">():</span>
+
+    <span class="c1">### constructor</span>
+
+<div class="viewcode-block" id="query.__init__"><a class="viewcode-back" href="../callhorizons.html#callhorizons.query.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">targetname</span><span class="p">,</span> <span class="n">smallbody</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize query to Horizons </span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        targetname         : str</span>
+<span class="sd">           HORIZONS-readable target number, name, or designation</span>
+<span class="sd">        smallbody          : boolean</span>
+<span class="sd">           use ``smallbody=False`` if targetname is a planet or spacecraft (optional, default: True)</span>
+<span class="sd">        </span>
+
+<span class="sd">        Results</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">targetname</span>     <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">targetname</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">not_smallbody</span>  <span class="o">=</span> <span class="ow">not</span> <span class="n">smallbody</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_epoch</span>    <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop_epoch</span>     <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">step_size</span>      <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">discreteepochs</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">url</span>            <span class="o">=</span> <span class="bp">None</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span>           <span class="o">=</span> <span class="bp">None</span>
+        
+        <span class="k">return</span> <span class="bp">None</span></div>
+
+
+    <span class="c1">### set epochs</span>
+
+<div class="viewcode-block" id="query.set_epochrange"><a class="viewcode-back" href="../callhorizons.html#callhorizons.query.set_epochrange">[docs]</a>    <span class="k">def</span> <span class="nf">set_epochrange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_epoch</span><span class="p">,</span> <span class="n">stop_epoch</span><span class="p">,</span> <span class="n">step_size</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set a range of epochs, all times are UT</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        start_epoch        :    str</span>
+<span class="sd">           start epoch of the format &#39;YYYY-MM-DD [HH-MM-SS]&#39;</span>
+<span class="sd">        stop_epoch         :    str</span>
+<span class="sd">           final epoch of the format &#39;YYYY-MM-DD [HH-MM-SS]&#39; </span>
+<span class="sd">        step_size          :    str</span>
+<span class="sd">           epoch step size, e.g., &#39;1d&#39; for 1 day, &#39;10m&#39; for 10 minutes...</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">        </span>
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; import callhorizons</span>
+<span class="sd">        &gt;&gt;&gt; ceres = callhorizons.query(&#39;Ceres&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; ceres.set_epochrange(&#39;2016-02-26&#39;, &#39;2016-10-25&#39;, &#39;1d&#39;)</span>
+
+<span class="sd">        Note that dates are mandatory; if no time is given, midnight is assumed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_epoch</span> <span class="o">=</span> <span class="n">start_epoch</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop_epoch</span>  <span class="o">=</span> <span class="n">stop_epoch</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">step_size</span>   <span class="o">=</span> <span class="n">step_size</span>
+
+        <span class="k">return</span> <span class="bp">None</span></div>
+
+
+<div class="viewcode-block" id="query.set_discreteepochs"><a class="viewcode-back" href="../callhorizons.html#callhorizons.query.set_discreteepochs">[docs]</a>    <span class="k">def</span> <span class="nf">set_discreteepochs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">discreteepochs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set a list of discrete epochs, epochs have to be given as Julian</span>
+<span class="sd">        Dates</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        discreteepochs    : list</span>
+<span class="sd">           list of floats or strings, maximum length: 15</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">        </span>
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; import callhorizons</span>
+<span class="sd">        &gt;&gt;&gt; ceres = callhorizons.query(&#39;Ceres&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; ceres.set_discreteepochs([2457446.177083, 2457446.182343])</span>
+<span class="sd">        </span>
+<span class="sd">        If more than 15 epochs are provided, the list will be cropped to 15 epochs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">discreteepochs</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">list</span><span class="p">:</span>
+            <span class="n">discreteepochs</span> <span class="o">=</span> <span class="p">[</span><span class="n">discreteepochs</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">discreteepochs</span> <span class="o">=</span> <span class="n">discreteepochs</span></div>
+
+
+    <span class="c1">### data access functions</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;returns list of available properties for all epochs&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">names</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="query.__len__"><a class="viewcode-back" href="../callhorizons.html#callhorizons.query.__len__">[docs]</a>    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;returns total number of epochs that have been queried&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span></div>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;returns list of epochs that have been queried (format &#39;YYYY-MM-DD HH-MM-SS&#39;)&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;datetime&#39;</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;returns URL that has been used in calling HORIZONS&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+
+
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dates_jd</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;returns list of epochs that have been queried (Julian Dates)&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;datetime_jd&#39;</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="query.__repr__"><a class="viewcode-back" href="../callhorizons.html#callhorizons.query.__repr__">[docs]</a>    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;returns brief query information&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;callhorizons.query object: </span><span class="si">%s</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetname</span></div>
+
+<div class="viewcode-block" id="query.__str__"><a class="viewcode-back" href="../callhorizons.html#callhorizons.query.__str__">[docs]</a>    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;returns information on the current query as string&quot;&quot;&quot;</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="s2">&quot;targetname: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetname</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">discreteepochs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">output</span> <span class="o">+=</span> <span class="s2">&quot;discrete epochs: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> \
+                      <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span> <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">discreteepochs</span><span class="p">])</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_epoch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop_epoch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">step_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="n">output</span> <span class="o">+=</span> <span class="s2">&quot;epoch range from </span><span class="si">%s</span><span class="s2"> to </span><span class="si">%s</span><span class="s2"> in steps of </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> \
+                      <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_epoch</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop_epoch</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">step_size</span><span class="p">)</span>
+        <span class="n">output</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="si">%d</span><span class="s2"> data sets queried with </span><span class="si">%d</span><span class="s2"> different fields&quot;</span> <span class="o">%</span> \
+                  <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">output</span></div>
+
+
+<div class="viewcode-block" id="query.__getitem__"><a class="viewcode-back" href="../callhorizons.html#callhorizons.query.__getitem__">[docs]</a>    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;provides access to query data</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        key          : str/int </span>
+<span class="sd">           epoch index or property key</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        query data according to key</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># check if data exist</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s1">&#39;CALLHORIZONS ERROR: run get_ephemerides or get_elements &#39;</span> <span class="o">+</span> \
+                  <span class="s1">&#39;first&#39;</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
+
+
+
+    <span class="c1">### call functions</span>
+        
+<div class="viewcode-block" id="query.get_ephemerides"><a class="viewcode-back" href="../callhorizons.html#callhorizons.query.get_ephemerides">[docs]</a>    <span class="k">def</span> <span class="nf">get_ephemerides</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observatory_code</span><span class="p">,</span> 
+                        <span class="n">airmass_lessthan</span><span class="o">=</span><span class="mi">99</span><span class="p">,</span> 
+                        <span class="n">solar_elongation</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">180</span><span class="p">),</span> 
+                        <span class="n">skip_daylight</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Call JPL HORIZONS website to obtain ephemerides based on the</span>
+<span class="sd">        provided targetname, epochs, and observatory_code. For a list</span>
+<span class="sd">        of valid observatory codes, refer to</span>
+<span class="sd">        http://minorplanetcenter.net/iau/lists/ObsCodesF.html</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        observatory_code     : str/int</span>
+<span class="sd">           observer&#39;s location code according to Minor Planet Center</span>
+<span class="sd">        airmass_lessthan     : float</span>
+<span class="sd">           maximum airmass (optional, default: 99)</span>
+<span class="sd">        solar_elongation     : tuple</span>
+<span class="sd">           permissible solar elongation range (optional, deg)</span>
+<span class="sd">        skip_daylight        : boolean</span>
+<span class="sd">           crop daylight epoch during query (optional)</span>
+<span class="sd">        </span>
+<span class="sd">        Results</span>
+<span class="sd">        -------</span>
+<span class="sd">        number of epochs queried</span>
+<span class="sd">        </span>
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; ceres = callhorizons.query(&#39;Ceres&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; ceres.set_epochrange(&#39;2016-02-23 00:00&#39;, &#39;2016-02-24 00:00&#39;, &#39;1h&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; print ceres.get_ephemerides(568), &#39;epochs queried&#39;</span>
+
+<span class="sd">        The queried properties and their definitions are:</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | Property         | Definition                                    |</span>
+<span class="sd">           +==================+===============================================+</span>
+<span class="sd">           | targetname       | official number, name, designation [string]   |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | H                | absolute magnitude in V band (float, mag)     |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | G                | photometric slope parameter (float)           |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | datetime         | epoch date and time (str, YYYY-MM-DD HH:MM:SS)|</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | datetime_jd      | epoch Julian Date (float)                     |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | solar_presence   | information on Sun&#39;s presence (str)           |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | lunar_presence   | information on Moon&#39;s presence (str)          |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | RA               | target RA (float, J2000.0)                    |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | DEC              | target DEC (float, J2000.0)                   |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | RA_rate          | target rate RA (float, arcsec/s)              |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | DEC_rate         | target RA (float, arcsec/s, includes cos(DEC))|</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | AZ               | Azimuth meas East(90) of North(0) (float, deg)|</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | EL               | Elevation (float, deg)                        |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | airmass          | target optical airmass (float)                |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | magextinct       | V-mag extinction due airmass (float, mag)     |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | V                | V magnitude (comets: total mag) (float, mag)  |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | illumination     | fraction of illuminated disk (float)          |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | EclLon           | heliocentr. ecl. long. (float, deg, J2000.0)  |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | EclLat           | heliocentr. ecl. lat. (float, deg, J2000.0)   |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | r                | heliocentric distance (float, au)             |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | r_rate           | heliocentric radial rate  (float, km/s)       |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | delta            | distance from the observer (float, au)        |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | delta_rate       | obs-centric radial rate (float, km/s)         |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | lighttime        | one-way light time (float, s)                 |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | elong            | solar elongation (float, deg)                 |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | elongFlag        | app. position relative to Sun (str)           |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | alpha            | solar phase angle (float, deg)                |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | sunTargetPA      | PA of Sun-&gt;target vector (float, deg, EoN)    |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | velocityPA       | PA of velocity vector (float, deg, EoN)       |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | GlxLon           | galactic longitude (float, deg)               |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | GlxLat           | galactic latitude  (float, deg)               |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | RA_3sigma        | 3sigma pos. unc. in RA (float, arcsec)        |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | DEC_3sigma       | 3sigma pos. unc. in DEC (float, arcsec)       |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c1"># queried fields (see HORIZONS website for details)</span>
+        <span class="c1"># if fields are added here, also update the field identification below</span>
+        <span class="n">quantities</span> <span class="o">=</span> <span class="s1">&#39;1,3,4,8,9,10,18,19,20,21,23,24,27,33,36&#39;</span>
+
+        <span class="c1"># encode objectname for use in URL</span>
+        <span class="n">objectname</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targetname</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">))</span>
+
+        <span class="c1">### construct URL for HORIZONS query</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;http://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=l&quot;</span> \
+              <span class="o">+</span> <span class="s2">&quot;&amp;TABLE_TYPE=&#39;OBSERVER&#39;&quot;</span> \
+              <span class="o">+</span> <span class="s2">&quot;&amp;QUANTITIES=&#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">quantities</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39;&quot;</span> \
+              <span class="o">+</span> <span class="s2">&quot;&amp;CSV_FORMAT=&#39;YES&#39;&quot;</span> \
+              <span class="o">+</span> <span class="s2">&quot;&amp;ANG_FORMAT=&#39;DEG&#39;&quot;</span> \
+              <span class="o">+</span> <span class="s2">&quot;&amp;CAL_FORMAT=&#39;BOTH&#39;&quot;</span> \
+              <span class="o">+</span> <span class="s2">&quot;&amp;SOLAR_ELONG=&#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">solar_elongation</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span> \
+              <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">solar_elongation</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;&#39;&quot;</span> \
+              <span class="o">+</span> <span class="s2">&quot;&amp;CENTER=&#39;&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">observatory_code</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;&#39;&quot;</span>
+
+        <span class="c1"># check if self.targetname is a designation</span>
+        <span class="c1"># lower case + upper case + numbers = pot. case sensitive designation</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">not_smallbody</span><span class="p">:</span>
+            <span class="n">url</span> <span class="o">+=</span> <span class="s2">&quot;&amp;COMMAND=&#39;&quot;</span> <span class="o">+</span> \
+                   <span class="n">urllib2</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targetname</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;&#39;&quot;</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetname</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">isalpha</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span>
+             <span class="bp">self</span><span class="o">.</span><span class="n">targetname</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span>
+             <span class="bp">self</span><span class="o">.</span><span class="n">targetname</span><span class="o">.</span><span class="n">islower</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span>
+             <span class="bp">self</span><span class="o">.</span><span class="n">targetname</span><span class="o">.</span><span class="n">isupper</span><span class="p">()):</span>
+            <span class="n">url</span> <span class="o">+=</span> <span class="s2">&quot;&amp;COMMAND=&#39;DES=&quot;</span> <span class="o">+</span> \
+                   <span class="n">urllib2</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targetname</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;%3B&#39;&quot;</span> 
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">url</span> <span class="o">+=</span> <span class="s2">&quot;&amp;COMMAND=&#39;&quot;</span> <span class="o">+</span> \
+                   <span class="n">urllib2</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targetname</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;%3B&#39;&quot;</span> 
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">discreteepochs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span> 
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">discreteepochs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">15</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s1">&#39;CALLHORIZONS WARNING: more than 15 discrete epochs &#39;</span> <span class="o">+</span>\
+                    <span class="s1">&#39;provided; output may be truncated.&#39;</span>
+            <span class="n">url</span> <span class="o">+=</span> <span class="s2">&quot;&amp;TLIST=&quot;</span> 
+            <span class="k">for</span> <span class="n">date</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">discreteepochs</span><span class="p">:</span>
+                <span class="n">url</span> <span class="o">+=</span> <span class="s2">&quot;&#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">date</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39;&quot;</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_epoch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop_epoch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> 
+              <span class="bp">self</span><span class="o">.</span><span class="n">step_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="n">url</span> <span class="o">+=</span>  <span class="s2">&quot;&amp;START_TIME=&#39;&quot;</span> \
+                    <span class="o">+</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_epoch</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;&#39;&quot;</span> \
+                    <span class="o">+</span> <span class="s2">&quot;&amp;STOP_TIME=&#39;&quot;</span> \
+                    <span class="o">+</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stop_epoch</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;&#39;&quot;</span> \
+                    <span class="o">+</span> <span class="s2">&quot;&amp;STEP_SIZE=&#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">step_size</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39;&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s1">&#39;CALLHORIZONS ERROR: no epoch information given&#39;</span>
+            <span class="k">return</span> <span class="mi">0</span>
+            
+        <span class="k">if</span> <span class="n">airmass_lessthan</span> <span class="o">&lt;</span> <span class="mi">99</span><span class="p">:</span>
+            <span class="n">url</span> <span class="o">+=</span> <span class="s2">&quot;&amp;AIRMASS=&#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">airmass_lessthan</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39;&quot;</span>
+
+        <span class="k">if</span> <span class="n">skip_daylight</span><span class="p">:</span>
+            <span class="n">url</span> <span class="o">+=</span> <span class="s2">&quot;&amp;SKIP_DAYLT=&#39;YES&#39;&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">url</span> <span class="o">+=</span> <span class="s2">&quot;&amp;SKIP_DAYLT=&#39;NO&#39;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">url</span>
+
+        <span class="c1">#print url</span>
+
+        <span class="c1">### call HORIZONS </span>
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">src</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">url</span><span class="p">)</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+                <span class="k">break</span>
+            <span class="k">except</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">URLError</span><span class="p">:</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="c1"># in case the HORIZONS website is blocked (due to another query)</span>
+                <span class="c1"># wait 1 second and try again</span>
+
+
+        <span class="c1">### disseminate website source code</span>
+        <span class="c1"># identify header line and extract data block (ephemerides data)</span>
+        <span class="c1"># also extract targetname, absolute mag. (H), and slope parameter (G)</span>
+        <span class="n">headerline</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">datablock</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">in_datablock</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">H</span><span class="p">,</span> <span class="n">G</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span> 
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span><span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">src</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;Date__(UT)__HR:MN&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">headerline</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;$$EOE</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">in_datablock</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">if</span> <span class="n">in_datablock</span><span class="p">:</span>
+                <span class="n">datablock</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;$$SOE</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">in_datablock</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;Target body name&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">targetname</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">18</span><span class="p">:</span><span class="mi">50</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">src</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;rotational period in hours)&quot;</span><span class="p">)</span><span class="o">&gt;-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">HGline</span> <span class="o">=</span> <span class="n">src</span><span class="p">[</span><span class="n">idx</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">HGline</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;B-V&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">HGline</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;n.a.&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="n">H</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">HGline</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;G&#39;</span><span class="p">))</span>
+                    <span class="n">G</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">HGline</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;B-V&#39;</span><span class="p">))</span>
+            <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;Multiple major-bodies match string&quot;</span> <span class="ow">in</span> <span class="n">src</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="ow">or</span>
+               <span class="p">(</span><span class="s2">&quot;Matching small-bodies&quot;</span> <span class="ow">in</span> <span class="n">src</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="ow">and</span> <span class="ow">not</span>
+                <span class="s2">&quot;No matches found&quot;</span> <span class="ow">in</span> <span class="n">src</span><span class="p">[</span><span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="p">])):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Ambiguous target name; check URL: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
+                                 <span class="n">url</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;Matching small-bodies&quot;</span> <span class="ow">in</span> <span class="n">src</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="ow">and</span>
+                <span class="s2">&quot;No matches found&quot;</span> <span class="ow">in</span> <span class="n">src</span><span class="p">[</span><span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="p">]):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unknown target; check URL: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">url</span><span class="p">)</span>
+
+
+        <span class="c1">### field identification for each line in </span>
+        <span class="n">ephemerides</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">datablock</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+
+            <span class="c1"># ignore line that don&#39;t hold any data</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">quantities</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)):</span>
+                <span class="k">continue</span>
+
+            <span class="n">this_eph</span>   <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">fieldnames</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">datatypes</span>   <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c1"># create a dictionary for each date (each line)</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span><span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">headerline</span><span class="p">):</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;Date__(UT)__HR:MN&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;datetime&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;Date_________JDUT&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;datetime_jd&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                    <span class="c1"># read out and convert solar presence</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;*&#39;</span><span class="p">:</span><span class="s1">&#39;daylight&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">:</span><span class="s1">&#39;civil twilight&#39;</span><span class="p">,</span>
+                                         <span class="s1">&#39;N&#39;</span><span class="p">:</span><span class="s1">&#39;nautical twilight&#39;</span><span class="p">,</span>
+                                         <span class="s1">&#39;A&#39;</span><span class="p">:</span><span class="s1">&#39;astronomical twilight&#39;</span><span class="p">,</span>
+                                         <span class="s1">&#39; &#39;</span><span class="p">:</span><span class="s1">&#39;dark&#39;</span><span class="p">,</span>
+                                         <span class="s1">&#39;t&#39;</span><span class="p">:</span><span class="s1">&#39;transiting&#39;</span><span class="p">}[</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="p">]])</span>
+                    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;n.a.&#39;</span><span class="p">)</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;solar_presence&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+                    <span class="c1"># read out and convert lunar presence</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;m&#39;</span><span class="p">:</span><span class="s1">&#39;moonlight&#39;</span><span class="p">,</span>
+                                         <span class="s1">&#39; &#39;</span><span class="p">:</span><span class="s1">&#39;dark&#39;</span><span class="p">}[</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="o">+</span><span class="mi">2</span><span class="p">]])</span>
+                    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;n.a.&#39;</span><span class="p">)</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;lunar_presence&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;R.A._(ICRF/J2000.0)&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;RA&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;DEC_(ICRF/J2000.0)&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;DEC&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;dRA*cosD&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span><span class="o">/</span><span class="mf">3600.</span><span class="p">)</span>  <span class="c1"># &quot;/s</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;RA_rate&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;d(DEC)/dt&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span><span class="o">/</span><span class="mf">3600.</span><span class="p">)</span>  <span class="c1"># &quot;/s</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;DEC_rate&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;Azi_(a-app)&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span> <span class="c1"># if AZ not given, e.g. for space telescopes</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                        <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;AZ&#39;</span><span class="p">)</span>
+                        <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span> 
+                        <span class="k">pass</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;Elev_(a-app)&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span> <span class="c1"># if EL not given, e.g. for space telescopes</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                        <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;EL&#39;</span><span class="p">)</span>
+                        <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                        <span class="k">pass</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;a-mass&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span> <span class="c1"># if airmass not given, e.g. for space telescopes</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;airmass&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;mag_ex&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span> <span class="c1"># if mag_ex not given, e.g. for space telescopes</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;magextinct&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;APmag&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;V&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;Illu%&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;illumination&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;hEcl-Lon&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>              
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;EclLon&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;hEcl-Lat&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;EclLat&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;  r&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="ow">and</span> \
+                   <span class="p">(</span><span class="n">headerline</span><span class="p">[</span><span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;rdot&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;rdot&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;r_rate&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;delta&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;delta&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;deldot&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;delta_rate&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;1-way_LT&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span><span class="o">*</span><span class="mf">60.</span><span class="p">)</span> <span class="c1"># seconds</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;lighttime&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;S-O-T&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;elong&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="c1"># in the case of space telescopes, &#39;/r     S-T-O&#39; is used;</span>
+                <span class="c1"># ground-based telescopes have both parameters in separate</span>
+                <span class="c1"># columns</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;/r    S-T-O&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;/L&#39;</span><span class="p">:</span><span class="s1">&#39;leading&#39;</span><span class="p">,</span> <span class="s1">&#39;/T&#39;</span><span class="p">:</span><span class="s1">&#39;trailing&#39;</span><span class="p">}</span>\
+                                    <span class="p">[</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]])</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;elongFlag&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">]))</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;alpha&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;S-T-O&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;alpha&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;/r&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;/L&#39;</span><span class="p">:</span><span class="s1">&#39;leading&#39;</span><span class="p">,</span> <span class="s1">&#39;/T&#39;</span><span class="p">:</span><span class="s1">&#39;trailing&#39;</span><span class="p">}</span>\
+                                    <span class="p">[</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]])</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;elongFlag&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;PsAng&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;sunTargetPA&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;PsAMV&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;velocityPA&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;GlxLon&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;GlxLon&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;GlxLat&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;GlxLat&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;RA_3sigma&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span> 
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;RA_3sigma&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;DEC_3sigma&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;DEC_3sigma&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="c1"># in the case of a comet, use total mag for V</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;T-mag&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;V&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+            <span class="c1"># append target name</span>
+            <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">targetname</span><span class="p">)</span>
+            <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;targetname&#39;</span><span class="p">)</span>
+            <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+            <span class="c1"># append H, G; if they exist </span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">H</span><span class="p">)</span>
+                <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">)</span>
+                <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
+                <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;G&#39;</span><span class="p">)</span>
+                <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">UnboundLocalError</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">this_eph</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">ephemerides</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">this_eph</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ephemerides</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+
+        <span class="c1"># combine ephemerides with column names and data types into ndarray</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">ephemerides</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">fieldnames</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">datatypes</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ephemerides</span><span class="p">,</span> 
+                               <span class="n">dtype</span><span class="o">=</span><span class="p">[(</span><span class="n">fieldnames</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">datatypes</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> 
+                                      <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fieldnames</span><span class="p">))])</span>
+
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+
+
+
+<div class="viewcode-block" id="query.get_elements"><a class="viewcode-back" href="../callhorizons.html#callhorizons.query.get_elements">[docs]</a>    <span class="k">def</span> <span class="nf">get_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="s1">&#39;500@10&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Call JPL HORIZONS website to obtain orbital elements based on the</span>
+<span class="sd">        provided targetname, epochs, and center code. For valid center</span>
+<span class="sd">        codes, please refer to http://ssd.jpl.nasa.gov/horizons.cgi</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        center        :  str</span>
+<span class="sd">           center body (default: 500@10 = Sun)</span>
+
+<span class="sd">        Results</span>
+<span class="sd">        -------</span>
+<span class="sd">        number of epochs queried</span>
+<span class="sd">        </span>
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; ceres = callhorizons.query(&#39;Ceres&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; ceres.set_epochrange(&#39;2016-02-23 00:00&#39;, &#39;2016-02-24 00:00&#39;, &#39;1h&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; print ceres.get_elements(), &#39;epochs queried&#39;</span>
+
+<span class="sd">        The queried properties and their definitions are:</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | Property         | Definition                                    |</span>
+<span class="sd">           +==================+===============================================+</span>
+<span class="sd">           | targetname       | official number, name, designation [string]   |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | H                | absolute magnitude in V band (float, mag)     |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | G                | photometric slope parameter (float)           |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | datetime_jd      | epoch Julian Date (float)                     |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | e                | eccentricity (float)                          |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | p                | periapsis distance (float, au)                |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | a                | semi-major axis (float, au)                   |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | incl             | inclination (float, deg)                      |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | node             | longitude of Asc. Node (float, deg)           |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | argper           | argument of the perifocus (float, deg)        |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | Tp               | time of periapsis (float, Julian Date)        |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | meananomaly      | mean anomaly (float, deg)                     |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | trueanomaly      | true anomaly (float, deg)                     |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | period           | orbital period (float, Earth yr)              |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | Q                | apoapsis distance (float, au)                 |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># encode objectname for use in URL</span>
+        <span class="n">objectname</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targetname</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">))</span>
+
+        <span class="c1">### call Horizons website and extract data</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;http://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=l&quot;</span> \
+              <span class="o">+</span> <span class="s2">&quot;&amp;TABLE_TYPE=&#39;ELEMENTS&#39;&quot;</span> \
+              <span class="o">+</span> <span class="s2">&quot;&amp;CSV_FORMAT=&#39;YES&#39;&quot;</span> \
+              <span class="o">+</span> <span class="s2">&quot;&amp;CENTER=&#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">center</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39;&quot;</span> \
+              <span class="o">+</span> <span class="s2">&quot;&amp;OUT_UNITS=&#39;AU-D&#39;&quot;</span> \
+              <span class="o">+</span> <span class="s2">&quot;&amp;REF_PLANE=&#39;ECLIPTIC&#39;&quot;</span> \
+              <span class="o">+</span> <span class="s2">&quot;REF_SYSTEM=&#39;J2000&#39;&quot;</span> \
+              <span class="o">+</span> <span class="s2">&quot;&amp;TP_TYPE=&#39;ABSOLUTE&#39;&quot;</span> \
+              <span class="o">+</span> <span class="s2">&quot;&amp;ELEM_LABELS=&#39;YES&#39;&quot;</span> \
+              <span class="o">+</span> <span class="s2">&quot;CSV_FORMAT=&#39;YES&#39;&quot;</span> \
+              <span class="o">+</span> <span class="s2">&quot;&amp;OBJ_DATA=&#39;YES&#39;&quot;</span>
+
+        <span class="c1"># check if self.targetname is a designation</span>
+        <span class="c1"># lower case + upper case + numbers = pot. case sensitive designation</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">not_smallbody</span><span class="p">:</span>
+            <span class="n">url</span> <span class="o">+=</span> <span class="s2">&quot;&amp;COMMAND=&#39;&quot;</span> <span class="o">+</span> \
+                   <span class="n">urllib2</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targetname</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;&#39;&quot;</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetname</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">isalpha</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span>
+             <span class="bp">self</span><span class="o">.</span><span class="n">targetname</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span>
+             <span class="bp">self</span><span class="o">.</span><span class="n">targetname</span><span class="o">.</span><span class="n">islower</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span>
+             <span class="bp">self</span><span class="o">.</span><span class="n">targetname</span><span class="o">.</span><span class="n">isupper</span><span class="p">()):</span>
+            <span class="n">url</span> <span class="o">+=</span> <span class="s2">&quot;&amp;COMMAND=&#39;DES=&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">objectname</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;%3B&#39;&quot;</span> 
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">url</span> <span class="o">+=</span> <span class="s2">&quot;&amp;COMMAND=&#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">objectname</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;%3B&#39;&quot;</span> 
+
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">discreteepochs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span> 
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">discreteepochs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">15</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s1">&#39;CALLHORIZONS WARNING: more than 15 discrete epochs &#39;</span> <span class="o">+</span>\
+                    <span class="s1">&#39;provided; output may be truncated.&#39;</span>
+            <span class="n">url</span> <span class="o">+=</span> <span class="s2">&quot;&amp;TLIST=&quot;</span> 
+            <span class="k">for</span> <span class="n">date</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">discreteepochs</span><span class="p">:</span>
+                <span class="n">url</span> <span class="o">+=</span> <span class="s2">&quot;&#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">date</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39;&quot;</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_epoch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop_epoch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> 
+              <span class="bp">self</span><span class="o">.</span><span class="n">step_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="n">url</span> <span class="o">+=</span>  <span class="s2">&quot;&amp;START_TIME=&#39;&quot;</span> \
+                    <span class="o">+</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_epoch</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;&#39;&quot;</span> \
+                    <span class="o">+</span> <span class="s2">&quot;&amp;STOP_TIME=&#39;&quot;</span> \
+                    <span class="o">+</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stop_epoch</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;&#39;&quot;</span> \
+                    <span class="o">+</span> <span class="s2">&quot;&amp;STEP_SIZE=&#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">step_size</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39;&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s1">&#39;CALLHORIZONS ERROR: no epoch information given&#39;</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">url</span>
+
+
+        <span class="c1">### call HORIZONS </span>
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">eph</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">url</span><span class="p">)</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+                <span class="k">break</span>
+            <span class="k">except</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">URLError</span><span class="p">:</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="c1"># in case the HORIZONS website is blocked (due to another query)</span>
+                <span class="c1"># wait 1 second and try again</span>
+
+        <span class="c1">### disseminate website source code</span>
+        <span class="c1"># identify header line and extract data block (ephemerides data)</span>
+        <span class="c1"># also extract targetname, abs. magnitude (H), and slope parameter (G)</span>
+        <span class="n">headerline</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">datablock</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">in_datablock</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span><span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">eph</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;EC, QR, IN, OM,&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">headerline</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;$$EOE</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">in_datablock</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">if</span> <span class="n">in_datablock</span><span class="p">:</span>
+                <span class="n">datablock</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;$$SOE</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">in_datablock</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;Target body name&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">targetname</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">18</span><span class="p">:</span><span class="mi">50</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">eph</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;rotational period in hours)&quot;</span><span class="p">)</span><span class="o">&gt;-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">HGline</span> <span class="o">=</span> <span class="n">eph</span><span class="p">[</span><span class="n">idx</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">HGline</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;B-V&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">HGline</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;n.a.&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="n">H</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">HGline</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;G&#39;</span><span class="p">))</span>
+                    <span class="n">G</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">HGline</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;B-V&#39;</span><span class="p">))</span>
+            <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;Multiple major-bodies match string&quot;</span> <span class="ow">in</span> <span class="n">eph</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="ow">or</span>
+               <span class="p">(</span><span class="s2">&quot;Matching small-bodies&quot;</span> <span class="ow">in</span> <span class="n">eph</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="ow">and</span> <span class="ow">not</span>
+                <span class="s2">&quot;No matches found&quot;</span> <span class="ow">in</span> <span class="n">eph</span><span class="p">[</span><span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="p">])):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Ambiguous target name; check URL: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
+                                 <span class="n">url</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;Matching small-bodies&quot;</span> <span class="ow">in</span> <span class="n">eph</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="ow">and</span>
+                <span class="s2">&quot;No matches found&quot;</span> <span class="ow">in</span> <span class="n">eph</span><span class="p">[</span><span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="p">]):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unknown target; check URL: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">url</span><span class="p">)</span>
+
+
+        <span class="c1">### field identification for each line in </span>
+        <span class="n">elements</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">datablock</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+
+            <span class="n">this_el</span>   <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">fieldnames</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">datatypes</span>   <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c1"># create a dictionary for each date (each line)</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span><span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">headerline</span><span class="p">):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;JDTDB&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>                           
+                    <span class="n">this_el</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;datetime_jd&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;EC&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>                           
+                    <span class="n">this_el</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;e&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;QR&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>                           
+                    <span class="n">this_el</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;p&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">this_el</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;IN&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>                           
+                    <span class="n">this_el</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;incl&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;OM&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>                           
+                    <span class="n">this_el</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;node&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;W&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>                           
+                    <span class="n">this_el</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;argper&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;Tp&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>                           
+                    <span class="n">this_el</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Tp&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;MA&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>                           
+                    <span class="n">this_el</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;meananomaly&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;TA&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>                           
+                    <span class="n">this_el</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;trueanomaly&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;PR&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>                           
+                    <span class="n">this_el</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span><span class="o">/</span><span class="p">(</span><span class="mf">365.256</span><span class="p">))</span> <span class="c1"># Earth years</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;period&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;AD&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>                           
+                    <span class="n">this_el</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Q&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+            <span class="n">this_el</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">targetname</span><span class="p">)</span>
+            <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;targetname&#39;</span><span class="p">)</span>
+            <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">this_el</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">H</span><span class="p">)</span>
+                <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">)</span>
+                <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="n">this_el</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
+                <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;G&#39;</span><span class="p">)</span>
+                <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">UnboundLocalError</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">this_el</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">elements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">this_el</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+                
+        <span class="c1"># combine elements with column names and data types into ndarray</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">elements</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">fieldnames</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">datatypes</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elements</span><span class="p">,</span> 
+                               <span class="n">dtype</span><span class="o">=</span><span class="p">[(</span><span class="n">fieldnames</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">datatypes</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> 
+                                      <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fieldnames</span><span class="p">))])</span>
+
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="query.export2pyephem"><a class="viewcode-back" href="../callhorizons.html#callhorizons.query.export2pyephem">[docs]</a>    <span class="k">def</span> <span class="nf">export2pyephem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="s1">&#39;500@10&#39;</span><span class="p">,</span> <span class="n">equinox</span><span class="o">=</span><span class="mf">2000.</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Call JPL HORIZONS website to obtain orbital elements based on the</span>
+<span class="sd">        provided targetname, epochs, and center code and create a</span>
+<span class="sd">        PyEphem (http://rhodesmill.org/pyephem/) object. This function</span>
+<span class="sd">        requires PyEphem to be installed.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        center        : str</span>
+<span class="sd">           center body (default: 500@10 = Sun)</span>
+<span class="sd">        equinox       : float</span>
+<span class="sd">           equinox (default: 2000.0)</span>
+
+<span class="sd">        Results</span>
+<span class="sd">        -------</span>
+<span class="sd">        list of PyEphem objects, one per epoch</span>
+<span class="sd">        </span>
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; import callhorizons</span>
+<span class="sd">        &gt;&gt;&gt; import numpy</span>
+<span class="sd">        &gt;&gt;&gt; import ephem</span>
+
+<span class="sd">        &gt;&gt;&gt; ceres = callhorizons.query(&#39;Ceres&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; ceres.set_epochrange(&#39;2016-02-23 00:00&#39;, &#39;2016-02-24 00:00&#39;, &#39;1h&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; ceres_pyephem = ceres.export2pyephem()</span>
+
+<span class="sd">        &gt;&gt;&gt; nau = ephem.Observer() # setup observer site</span>
+<span class="sd">        &gt;&gt;&gt; nau.lon = -111.653152/180.*numpy.pi</span>
+<span class="sd">        &gt;&gt;&gt; nau.lat = 35.184108/180.*numpy.pi</span>
+<span class="sd">        &gt;&gt;&gt; nau.elevation = 2100 # m</span>
+<span class="sd">        &gt;&gt;&gt; nau.date = &#39;2015/10/5 01:23&#39; # UT </span>
+<span class="sd">        &gt;&gt;&gt; print &#39;next rising: %s&#39; % nau.next_rising(ceres_pyephem[0])</span>
+<span class="sd">        &gt;&gt;&gt; print &#39;next transit: %s&#39; % nau.next_transit(ceres_pyephem[0])</span>
+<span class="sd">        &gt;&gt;&gt; print &#39;next setting: %s&#39; % nau.next_setting(ceres_pyephem[0])</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">ephem</span>
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s2">&quot;ERROR: cannot import module PyEphem&quot;</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+        <span class="c1"># obtain orbital elements</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_elements</span><span class="p">(</span><span class="n">center</span><span class="p">)</span>
+
+        <span class="n">objects</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="mf">0.9856076686</span><span class="o">/</span><span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">el</span><span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">]</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span> <span class="c1"># mean daily motion</span>
+            <span class="n">epoch_djd</span> <span class="o">=</span> <span class="n">el</span><span class="p">[</span><span class="s1">&#39;datetime_jd&#39;</span><span class="p">]</span><span class="o">-</span><span class="mf">2415020.0</span>  <span class="c1"># Dublin Julian date</span>
+            <span class="n">epoch</span> <span class="o">=</span> <span class="n">ephem</span><span class="o">.</span><span class="n">date</span><span class="p">(</span><span class="n">epoch_djd</span><span class="p">)</span>
+            <span class="n">epoch_str</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%d</span><span class="s2">/</span><span class="si">%f</span><span class="s2">/</span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">epoch</span><span class="o">.</span><span class="n">triple</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span> <span class="n">epoch</span><span class="o">.</span><span class="n">triple</span><span class="p">()[</span><span class="mi">2</span><span class="p">],</span> 
+                                     <span class="n">epoch</span><span class="o">.</span><span class="n">triple</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+
+            <span class="c1"># export to PyEphem</span>
+            <span class="n">objects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ephem</span><span class="o">.</span><span class="n">readdb</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">,e,</span><span class="si">%f</span><span class="s2">,</span><span class="si">%f</span><span class="s2">,</span><span class="si">%f</span><span class="s2">,</span><span class="si">%f</span><span class="s2">,</span><span class="si">%f</span><span class="s2">,</span><span class="si">%f</span><span class="s2">,</span><span class="si">%f</span><span class="s2">,</span><span class="si">%s</span><span class="s2">,</span><span class="si">%i</span><span class="s2">,</span><span class="si">%f</span><span class="s2">,</span><span class="si">%f</span><span class="s2">&quot;</span><span class="o">%</span>
+                                    <span class="p">(</span><span class="n">el</span><span class="p">[</span><span class="s1">&#39;targetname&#39;</span><span class="p">],</span> <span class="n">el</span><span class="p">[</span><span class="s1">&#39;incl&#39;</span><span class="p">],</span> <span class="n">el</span><span class="p">[</span><span class="s1">&#39;node&#39;</span><span class="p">],</span>
+                                     <span class="n">el</span><span class="p">[</span><span class="s1">&#39;argper&#39;</span><span class="p">],</span> <span class="n">el</span><span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">],</span> <span class="n">n</span><span class="p">,</span> <span class="n">el</span><span class="p">[</span><span class="s1">&#39;e&#39;</span><span class="p">],</span>
+                                     <span class="n">el</span><span class="p">[</span><span class="s1">&#39;meananomaly&#39;</span><span class="p">],</span> <span class="n">epoch_str</span><span class="p">,</span> <span class="n">equinox</span><span class="p">,</span>
+                                    <span class="n">el</span><span class="p">[</span><span class="s1">&#39;H&#39;</span><span class="p">],</span> <span class="n">el</span><span class="p">[</span><span class="s1">&#39;G&#39;</span><span class="p">])))</span>
+    
+        <span class="k">return</span> <span class="n">objects</span></div></div>
+
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../readme.html">CALLHORIZONS 0.9 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Michael Mommert.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.5.
+    </div>
+  </body>
+</html>
