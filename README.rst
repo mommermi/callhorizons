@@ -64,10 +64,14 @@ michael.mommert (at) nau.edu, latest version: v0.9, 2016-02-27
 Changelog
 ---------
 
+* 2016-09-12: bugfix in get_elements, v1.0.1
+
+* 2016-07-19: implemented query for non-asteroidal objects (planets and satellits), v1.0
+
 * 2016-01-13: implemented function export2pyephem that exports orbital
   elements into a PyEphem object
   (requires PyEphem: http://rhodesmill.org/pyephem/)
 
-* 2016-02-27: changed structure into class structure, created pip installer
+* 2016-02-27: changed structure into class structure, created pip installer, v1.0
 
 .. _documentation: http://mommermi.github.io/callhorizons/readme.html

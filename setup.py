@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name = "CALLHORIZONS",
-    version = "1.0.0",
+    version = "1.0.1",
     author = "Michael Mommert",
     author_email = "michael.mommert (at) nau.edu",
     description = "CALLHORIZONS is a Python 2.7 interface to access JPL HORIZONS ephemerides and orbital elements of Solar System bodies.",

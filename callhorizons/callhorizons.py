@@ -7,8 +7,14 @@ website. Ephemerides can be obtained through get_ephemerides,
 orbital elements through get_elements. Function 
 export2pyephem provides an interface to the PyEphem module.
 
-michael.mommert (at) nau.edu, latest version: v1.0, 2016-07-19.
+michael.mommert (at) nau.edu, latest version: v1.0.1, 2016-07-19.
 This code is inspired by code created by Alex Hagen.
+
+
+v1.0.1: get_ephemerides fixed
+v1.0:   bugfixes completed, planets/satellites accessible, too
+v0.9:   first release
+
 
 """
 
@@ -788,7 +794,6 @@ class query():
         
         self.url = url
 
-
         ### call HORIZONS 
         while True:
             try:
@@ -806,7 +811,7 @@ class query():
         datablock = []
         in_datablock = False
         for idx,line in enumerate(eph):
-            if line.find('EC, QR, IN, OM,') > -1:
+            if line.find('JDTDB,') > -1:
                 headerline = line.split(',')
             if line.find("$$EOE\n") > -1:
                 in_datablock = False
