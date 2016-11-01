@@ -130,7 +130,8 @@ class query():
     def __len__(self):
         """returns total number of epochs that have been queried"""
         try:
-            return self.data.shape[0]
+            # Cast to int because a long is returned from shape on Windows.
+            return int(self.data.shape[0])
         except AttributeError:
             return 0
     
