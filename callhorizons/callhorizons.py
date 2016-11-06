@@ -1,4 +1,4 @@
-"""CALLHORIZONS - a Python 2.7 interface to access JPL HORIZONS
+"""CALLHORIZONS - a Python interface to access JPL HORIZONS
 ephemerides and orbital elements.
 
 This module provides a convenient python interface to the JPL
@@ -11,6 +11,7 @@ michael.mommert (at) nau.edu, latest version: v1.0.1, 2016-07-19.
 This code is inspired by code created by Alex Hagen.
 
 
+v1.0.2: Python 3.5 compatibility implemented
 v1.0.1: get_ephemerides fixed
 v1.0:   bugfixes completed, planets/satellites accessible, too
 v0.9:   first release
@@ -18,9 +19,19 @@ v0.9:   first release
 
 """
 
+from __future__ import (print_function, unicode_literals)
+
+
 import time
-import numpy
-import urllib2
+import numpy as np
+try:
+    # Python 3
+    import urllib.request as urllib
+except ImportError:
+    # Python 2
+    import urllib2 as urllib
+
+
 
 
 class query():
@@ -196,8 +207,8 @@ class query():
 
         # check if data exist
         if self.data is None or len(self.data) == 0:
-            print 'CALLHORIZONS ERROR: run get_ephemerides or get_elements ' + \
-                  'first'
+            print ('CALLHORIZONS ERROR: run get_ephemerides or get_elements', 
+                   'first')
             return None
 
         return self.data[key]
@@ -234,7 +245,7 @@ class query():
         --------
         >>> ceres = callhorizons.query('Ceres')
         >>> ceres.set_epochrange('2016-02-23 00:00', '2016-02-24 00:00', '1h')
-        >>> print ceres.get_ephemerides(568), 'epochs queried'
+        >>> print (ceres.get_ephemerides(568), 'epochs queried')
 
         The queried properties and their definitions are:
            +------------------+-----------------------------------------------+
@@ -314,7 +325,7 @@ class query():
         quantities = '1,3,4,8,9,10,18,19,20,21,23,24,27,33,36'
 
         # encode objectname for use in URL
-        objectname = urllib2.quote(self.targetname.encode("utf8"))
+        objectname = urllib.quote(self.targetname.encode("utf8"))
 
         ### construct URL for HORIZONS query
         url = "http://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=l" \
@@ -331,34 +342,33 @@ class query():
         # lower case + upper case + numbers = pot. case sensitive designation
         if self.not_smallbody:
             url += "&COMMAND='" + \
-                   urllib2.quote(self.targetname.encode("utf8")) + "'"
+                   urllib.quote(self.targetname.encode("utf8")) + "'"
         elif (not self.targetname.replace(' ', '').isalpha() and not
              self.targetname.isdigit() and not
              self.targetname.islower() and not
              self.targetname.isupper()):
             url += "&COMMAND='DES=" + \
-                   urllib2.quote(self.targetname.encode("utf8")) + "%3B'" 
+                   urllib.quote(self.targetname.encode("utf8")) + "%3B'" 
         else:
             url += "&COMMAND='" + \
-                   urllib2.quote(self.targetname.encode("utf8")) + "%3B'" 
+                   urllib.quote(self.targetname.encode("utf8")) + "%3B'" 
 
         if self.discreteepochs is not None: 
             if len(self.discreteepochs) > 15:
-                print 'CALLHORIZONS WARNING: more than 15 discrete epochs ' +\
-                    'provided; output may be truncated.'
+                print ('CALLHORIZONS WARNING: more than 15 discrete epochs',
+                       'provided; output may be truncated.')
             url += "&TLIST=" 
             for date in self.discreteepochs:
                 url += "'" + str(date) + "'"
         elif (self.start_epoch is not None and self.stop_epoch is not None and 
               self.step_size is not None):
             url +=  "&START_TIME='" \
-                    + urllib2.quote(self.start_epoch.encode("utf8")) + "'" \
+                    + urllib.quote(self.start_epoch.encode("utf8")) + "'" \
                     + "&STOP_TIME='" \
-                    + urllib2.quote(self.stop_epoch.encode("utf8")) + "'" \
+                    + urllib.quote(self.stop_epoch.encode("utf8")) + "'" \
                     + "&STEP_SIZE='" + str(self.step_size) + "'"
         else:
-            print 'CALLHORIZONS ERROR: no epoch information given'
-            return 0
+            raise IOError('no epoch information given')
             
         if airmass_lessthan < 99:
             url += "&AIRMASS='" + str(airmass_lessthan) + "'"
@@ -370,57 +380,65 @@ class query():
 
         self.url = url
 
-        #print url
+        #print (url)
 
         ### call HORIZONS 
+        i = 0  # count number of connection tries
         while True:
             try:
-                src = urllib2.urlopen(url).readlines()
+                src = urllib.urlopen(url).readlines()
                 break
-            except urllib2.URLError:
-                time.sleep(1)
+            except urllib.URLError:
+                time.sleep(0.1)
                 # in case the HORIZONS website is blocked (due to another query)
                 # wait 1 second and try again
-
-
+            i += 1
+            if i > 50:
+                return 0 # website could not be reached
+                
         ### disseminate website source code
         # identify header line and extract data block (ephemerides data)
         # also extract targetname, absolute mag. (H), and slope parameter (G)
         headerline = []
         datablock = []
         in_datablock = False
-        H, G = None, None 
+        H, G = np.nan, np.nan
         for idx,line in enumerate(src):
-            if line.find('Date__(UT)__HR:MN') > -1:
+            line = line.decode('UTF-8')
+
+            if "Date__(UT)__HR:MN" in line:
                 headerline = line.split(',')
-            if line.find("$$EOE\n") > -1:
+            if "$$EOE\n" in line:
                 in_datablock = False
             if in_datablock:
                 datablock.append(line)
-            if line.find("$$SOE\n") > -1:
+            if "$$SOE\n" in line:
                 in_datablock = True
-            if line.find("Target body name") > -1:
+            if "Target body name" in line:
                 targetname = line[18:50].strip()
-            if src[idx].find("rotational period in hours)")>-1:
-                HGline = src[idx+2].split('=')
-                if HGline[2].find('B-V') > -1 and HGline[1].find('n.a.') == -1:
+            if ("rotational period in hours)" in
+                src[idx].decode('UTF-8')):
+                HGline = src[idx+2].decode('UTF-8').split('=')
+                if 'B-V' in HGline[2]  and 'G' in HGline[1]:
                     H = float(HGline[1].rstrip('G'))
                     G = float(HGline[2].rstrip('B-V'))
-            if ("Multiple major-bodies match string" in src[idx] or
-               ("Matching small-bodies" in src[idx] and not
-                "No matches found" in src[idx+1])):
+            if ("Multiple major-bodies match string" in
+                src[idx].decode('UTF-8') or
+               ("Matching small-bodies" in src[idx].decode('UTF-8') and not
+                "No matches found" in src[idx+1].decode('UTF-8'))):
                 raise ValueError('Ambiguous target name; check URL: %s' %
                                  url)
-            if ("Matching small-bodies" in src[idx] and
-                "No matches found" in src[idx+1]):
+            if ("Matching small-bodies" in src[idx].decode('UTF-8') and
+                "No matches found" in src[idx+1].decode('UTF-8')):
                 raise ValueError('Unknown target; check URL: %s' % url)
 
 
-        ### field identification for each line in 
+            
+        ### field identification for each line
         ephemerides = []
         for line in datablock:
             line = line.split(',')
-
+            
             # ignore line that don't hold any data
             if len(line) < len(quantities.split(',')):
                 continue
@@ -432,14 +450,14 @@ class query():
             # create a dictionary for each date (each line)
             for idx,item in enumerate(headerline):
 
-                if (item.find('Date__(UT)__HR:MN') > -1):
+                if ('Date__(UT)__HR:MN' in item):
                     this_eph.append(line[idx].strip())
                     fieldnames.append('datetime')
                     datatypes.append(object)
-                if (item.find('Date_________JDUT') > -1):
-                    this_eph.append(float(line[idx]))
+                if ('Date_________JDUT' in item):
+                    this_eph.append(np.float64(line[idx]))
                     fieldnames.append('datetime_jd')
-                    datatypes.append(float)
+                    datatypes.append(np.float64)
                     # read out and convert solar presence
                     try:
                         this_eph.append({'*':'daylight', 'C':'civil twilight',
@@ -460,126 +478,126 @@ class query():
                     fieldnames.append('lunar_presence')
                     datatypes.append(object)
                 if (item.find('R.A._(ICRF/J2000.0)') > -1):
-                    this_eph.append(float(line[idx]))
+                    this_eph.append(np.float64(line[idx]))
                     fieldnames.append('RA')
-                    datatypes.append(float)
+                    datatypes.append(np.float64)
                 if (item.find('DEC_(ICRF/J2000.0)') > -1):
-                    this_eph.append(float(line[idx]))
+                    this_eph.append(np.float64(line[idx]))
                     fieldnames.append('DEC')
-                    datatypes.append(float)
+                    datatypes.append(np.float64)
                 if (item.find('dRA*cosD') > -1):
                     try:
-                        this_eph.append(float(line[idx])/3600.)  # "/s
+                        this_eph.append(np.float64(line[idx])/3600.)  # "/s
                     except ValueError:
-                        this_eph.append(numpy.nan)
+                        this_eph.append(np.nan)
                     fieldnames.append('RA_rate')
-                    datatypes.append(float)
+                    datatypes.append(np.float64)
                 if (item.find('d(DEC)/dt') > -1):
                     try:
-                        this_eph.append(float(line[idx])/3600.)  # "/s
+                        this_eph.append(np.float64(line[idx])/3600.)  # "/s
                     except ValueError:
-                        this_eph.append(numpy.nan)
+                        this_eph.append(np.nan)
                     fieldnames.append('DEC_rate')
-                    datatypes.append(float)
+                    datatypes.append(np.float64)
                 if (item.find('Azi_(a-app)') > -1):
                     try: # if AZ not given, e.g. for space telescopes
-                        this_eph.append(float(line[idx]))
+                        this_eph.append(np.float64(line[idx]))
                         fieldnames.append('AZ')
-                        datatypes.append(float)
+                        datatypes.append(np.float64)
                     except ValueError: 
                         pass
                 if (item.find('Elev_(a-app)') > -1):
                     try: # if EL not given, e.g. for space telescopes
-                        this_eph.append(float(line[idx]))
+                        this_eph.append(np.float64(line[idx]))
                         fieldnames.append('EL')
-                        datatypes.append(float)
+                        datatypes.append(np.float64)
                     except ValueError:
                         pass
                 if (item.find('a-mass') > -1):
                     try: # if airmass not given, e.g. for space telescopes
-                        this_eph.append(float(line[idx]))
+                        this_eph.append(np.float64(line[idx]))
                     except ValueError:
-                        this_eph.append(numpy.nan)
+                        this_eph.append(np.nan)
                     fieldnames.append('airmass')
-                    datatypes.append(float)
+                    datatypes.append(np.float64)
                 if (item.find('mag_ex') > -1):
                     try: # if mag_ex not given, e.g. for space telescopes
-                        this_eph.append(float(line[idx]))
+                        this_eph.append(np.float64(line[idx]))
                     except ValueError:
-                        this_eph.append(numpy.nan)
+                        this_eph.append(np.nan)
                     fieldnames.append('magextinct')
-                    datatypes.append(float)
+                    datatypes.append(np.float64)
                 if (item.find('APmag') > -1):
                     try:
-                        this_eph.append(float(line[idx]))
+                        this_eph.append(np.float64(line[idx]))
                     except ValueError:
-                        this_eph.append(numpy.nan)
+                        this_eph.append(np.nan)
                     fieldnames.append('V')
-                    datatypes.append(float)
+                    datatypes.append(np.float64)
                 if (item.find('Illu%') > -1):
                     try:
-                        this_eph.append(float(line[idx]))
+                        this_eph.append(np.float64(line[idx]))
                     except ValueError:
-                        this_eph.append(numpy.nan)
+                        this_eph.append(np.nan)
                     fieldnames.append('illumination')
-                    datatypes.append(float)
+                    datatypes.append(np.float64)
                 if (item.find('hEcl-Lon') > -1):
                     try:              
-                        this_eph.append(float(line[idx]))
+                        this_eph.append(np.float64(line[idx]))
                     except ValueError:
-                        this_eph.append(numpy.nan)
+                        this_eph.append(np.nan)
                     fieldnames.append('EclLon')
-                    datatypes.append(float)
+                    datatypes.append(np.float64)
                 if (item.find('hEcl-Lat') > -1):
                     try:
-                        this_eph.append(float(line[idx]))
+                        this_eph.append(np.float64(line[idx]))
                     except ValueError:
-                        this_eph.append(numpy.nan)
+                        this_eph.append(np.nan)
                     fieldnames.append('EclLat')
-                    datatypes.append(float)
+                    datatypes.append(np.float64)
                 if (item.find('  r') > -1) and \
                    (headerline[idx+1].find("rdot") > -1):
                     try:
-                        this_eph.append(float(line[idx]))
+                        this_eph.append(np.float64(line[idx]))
                     except ValueError:
-                        this_eph.append(numpy.nan)
+                        this_eph.append(np.nan)
                     fieldnames.append('r')
-                    datatypes.append(float)
+                    datatypes.append(np.float64)
                 if (item.find('rdot') > -1):
                     try:
-                        this_eph.append(float(line[idx]))
+                        this_eph.append(np.float64(line[idx]))
                     except ValueError:
-                        this_eph.append(numpy.nan)
+                        this_eph.append(np.nan)
                     fieldnames.append('r_rate')
-                    datatypes.append(float)
+                    datatypes.append(np.float64)
                 if (item.find('delta') > -1):
                     try:
-                        this_eph.append(float(line[idx]))
+                        this_eph.append(np.float64(line[idx]))
                     except ValueError:
-                        this_eph.append(numpy.nan)
+                        this_eph.append(np.nan)
                     fieldnames.append('delta')
-                    datatypes.append(float)
+                    datatypes.append(np.float64)
                 if (item.find('deldot') > -1):
                     try:
-                        this_eph.append(float(line[idx]))
+                        this_eph.append(np.float64(line[idx]))
                     except ValueError:
-                        this_eph.append(numpy.nan)
+                        this_eph.append(np.nan)
                     fieldnames.append('delta_rate')
-                    datatypes.append(float)
+                    datatypes.append(np.float64)
                 if (item.find('1-way_LT') > -1):
                     try:
-                        this_eph.append(float(line[idx])*60.) # seconds
+                        this_eph.append(np.float64(line[idx])*60.) # seconds
                     except ValueError:
-                        this_eph.append(numpy.nan)
+                        this_eph.append(np.nan)
                     fieldnames.append('lighttime')
-                    datatypes.append(float)
+                    datatypes.append(np.float64)
                 if (item.find('S-O-T') > -1):
                     try:
-                        this_eph.append(float(line[idx]))
+                        this_eph.append(np.float64(line[idx]))
                     except ValueError:
-                        this_eph.append(numpy.nan)
+                        this_eph.append(np.nan)
                     fieldnames.append('elong')
-                    datatypes.append(float)
+                    datatypes.append(np.float64)
                 # in the case of space telescopes, '/r     S-T-O' is used;
                 # ground-based telescopes have both parameters in separate
                 # columns
@@ -589,18 +607,18 @@ class query():
                     fieldnames.append('elongFlag')
                     datatypes.append(object)
                     try:
-                        this_eph.append(float(line[idx].split()[1]))
+                        this_eph.append(np.float64(line[idx].split()[1]))
                     except ValueError:
-                        this_eph.append(numpy.nan)
+                        this_eph.append(np.nan)
                     fieldnames.append('alpha')
-                    datatypes.append(float)
+                    datatypes.append(np.float64)
                 elif (item.find('S-T-O') > -1):
                     try:
-                        this_eph.append(float(line[idx]))
+                        this_eph.append(np.float64(line[idx]))
                     except ValueError:
-                        this_eph.append(numpy.nan)
+                        this_eph.append(np.nan)
                     fieldnames.append('alpha')
-                    datatypes.append(float)
+                    datatypes.append(np.float64)
                 elif (item.find('/r') > -1):
                     this_eph.append({'/L':'leading', '/T':'trailing'}\
                                     [line[idx]])
@@ -608,68 +626,69 @@ class query():
                     datatypes.append(object)
                 if (item.find('PsAng') > -1):
                     try:
-                        this_eph.append(float(line[idx]))
+                        this_eph.append(np.float64(line[idx]))
                     except ValueError:
-                        this_eph.append(numpy.nan)
+                        this_eph.append(np.nan)
                     fieldnames.append('sunTargetPA')
-                    datatypes.append(float)
+                    datatypes.append(np.float64)
                 if (item.find('PsAMV') > -1):
                     try:
-                        this_eph.append(float(line[idx]))
+                        this_eph.append(np.float64(line[idx]))
                     except ValueError:
-                        this_eph.append(numpy.nan)
+                        this_eph.append(np.nan)
                     fieldnames.append('velocityPA')
-                    datatypes.append(float)
+                    datatypes.append(np.float64)
                 if (item.find('GlxLon') > -1):
                     try:
-                        this_eph.append(float(line[idx]))
+                        this_eph.append(np.float64(line[idx]))
                     except ValueError:
-                        this_eph.append(numpy.nan)
+                        this_eph.append(np.nan)
                     fieldnames.append('GlxLon')
-                    datatypes.append(float)
+                    datatypes.append(np.float64)
                 if (item.find('GlxLat') > -1):
                     try:
-                        this_eph.append(float(line[idx]))
+                        this_eph.append(np.float64(line[idx]))
                     except ValueError:
-                        this_eph.append(numpy.nan)
+                        this_eph.append(np.nan)
                     fieldnames.append('GlxLat')
-                    datatypes.append(float)
+                    datatypes.append(np.float64)
                 if (item.find('RA_3sigma') > -1):
                     try: 
-                        this_eph.append(float(line[idx]))
+                        this_eph.append(np.float64(line[idx]))
                     except ValueError:
-                        this_eph.append(numpy.nan)
+                        this_eph.append(np.nan)
                     fieldnames.append('RA_3sigma')
-                    datatypes.append(float)
+                    datatypes.append(np.float64)
                 if (item.find('DEC_3sigma') > -1):
                     try:
-                        this_eph.append(float(line[idx]))
+                        this_eph.append(np.float64(line[idx]))
                     except ValueError:
-                        this_eph.append(numpy.nan)
+                        this_eph.append(np.nan)
                     fieldnames.append('DEC_3sigma')
-                    datatypes.append(float)
+                    datatypes.append(np.float64)
                 # in the case of a comet, use total mag for V
                 if (item.find('T-mag') > -1):
                     try:
-                        this_eph.append(float(line[idx]))
+                        this_eph.append(np.float64(line[idx]))
                     except ValueError:
-                        this_eph.append(numpy.nan)
+                        this_eph.append(np.nan)
                     fieldnames.append('V')
-                    datatypes.append(float)
+                    datatypes.append(np.float64)
+
             # append target name
             this_eph.append(targetname)
             fieldnames.append('targetname')
             datatypes.append(object)
-            # append H, G; if they exist 
-            try:
-                this_eph.append(H)
-                fieldnames.append('H')
-                datatypes.append(float)
-                this_eph.append(G)
-                fieldnames.append('G')
-                datatypes.append(float)
-            except UnboundLocalError:
-                pass
+            
+            # append H
+            this_eph.append(H)
+            fieldnames.append('H')
+            datatypes.append(np.float64)
+
+            # append G
+            this_eph.append(G)
+            fieldnames.append('G')
+            datatypes.append(np.float64)
 
             if len(this_eph) > 0:
                 ephemerides.append(tuple(this_eph))
@@ -679,8 +698,8 @@ class query():
 
         # combine ephemerides with column names and data types into ndarray
         assert len(ephemerides[0]) == len(fieldnames) == len(datatypes)
-        self.data = numpy.array(ephemerides, 
-                               dtype=[(fieldnames[i], datatypes[i]) for i 
+        self.data = np.array(ephemerides, 
+                               dtype=[(str(fieldnames[i]), datatypes[i]) for i 
                                       in range(len(fieldnames))])
 
         return len(self)
@@ -706,7 +725,7 @@ class query():
         --------
         >>> ceres = callhorizons.query('Ceres')
         >>> ceres.set_epochrange('2016-02-23 00:00', '2016-02-24 00:00', '1h')
-        >>> print ceres.get_elements(), 'epochs queried'
+        >>> print (ceres.get_elements(), 'epochs queried')
 
         The queried properties and their definitions are:
            +------------------+-----------------------------------------------+
@@ -746,7 +765,7 @@ class query():
         """
 
         # encode objectname for use in URL
-        objectname = urllib2.quote(self.targetname.encode("utf8"))
+        objectname = urllib.quote(self.targetname.encode("utf8"))
 
         ### call Horizons website and extract data
         url = "http://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=l" \
@@ -765,7 +784,7 @@ class query():
         # lower case + upper case + numbers = pot. case sensitive designation
         if self.not_smallbody:
             url += "&COMMAND='" + \
-                   urllib2.quote(self.targetname.encode("utf8")) + "'"
+                   urllib.quote(self.targetname.encode("utf8")) + "'"
         elif (not self.targetname.replace(' ', '').isalpha() and not
              self.targetname.isdigit() and not
              self.targetname.islower() and not
@@ -777,63 +796,68 @@ class query():
 
         if self.discreteepochs is not None: 
             if len(self.discreteepochs) > 15:
-                print 'CALLHORIZONS WARNING: more than 15 discrete epochs ' +\
-                    'provided; output may be truncated.'
+                print ('CALLHORIZONS WARNING: more than 15 discrete epochs ',
+                       'provided; output may be truncated.')
             url += "&TLIST=" 
             for date in self.discreteepochs:
                 url += "'" + str(date) + "'"
         elif (self.start_epoch is not None and self.stop_epoch is not None and 
               self.step_size is not None):
             url +=  "&START_TIME='" \
-                    + urllib2.quote(self.start_epoch.encode("utf8")) + "'" \
+                    + urllib.quote(self.start_epoch.encode("utf8")) + "'" \
                     + "&STOP_TIME='" \
-                    + urllib2.quote(self.stop_epoch.encode("utf8")) + "'" \
+                    + urllib.quote(self.stop_epoch.encode("utf8")) + "'" \
                     + "&STEP_SIZE='" + str(self.step_size) + "'"
         else:
-            print 'CALLHORIZONS ERROR: no epoch information given'
-            return 0
+            raise IOError('no epoch information given')
         
         self.url = url
 
-        ### call HORIZONS 
+        i = 0  # count number of connection tries
         while True:
             try:
-                eph = urllib2.urlopen(url).readlines()
+                src = urllib.urlopen(url).readlines()
                 break
-            except urllib2.URLError:
-                time.sleep(1)
+            except urllib.URLError:
+                time.sleep(0.1)
                 # in case the HORIZONS website is blocked (due to another query)
                 # wait 1 second and try again
+            i += 1
+            if i > 50:
+                return 0 # website could not be reached
 
         ### disseminate website source code
-        # identify header line and extract data block (ephemerides data)
+        # identify header line and extract data block (elements data)
         # also extract targetname, abs. magnitude (H), and slope parameter (G)
         headerline = []
         datablock = []
         in_datablock = False
-        for idx,line in enumerate(eph):
-            if line.find('JDTDB,') > -1:
+        H, G = np.nan, np.nan
+        for idx,line in enumerate(src):
+            line = line.decode('UTF-8')            
+
+            if 'JDTDB,' in line:
                 headerline = line.split(',')
-            if line.find("$$EOE\n") > -1:
+            if "$$EOE\n" in line:
                 in_datablock = False
             if in_datablock:
                 datablock.append(line)
-            if line.find("$$SOE\n") > -1:
+            if "$$SOE\n" in line:
                 in_datablock = True
-            if line.find("Target body name") > -1:
+            if "Target body name" in line:
                 targetname = line[18:50].strip()
-            if eph[idx].find("rotational period in hours)")>-1:
-                HGline = eph[idx+2].split('=')
-                if HGline[2].find('B-V') > -1 and HGline[1].find('n.a.') == -1:
+            if "rotational period in hours)" in src[idx].decode('UTF-8'):
+                HGline = src[idx+2].decode('UTF-8').split('=')
+                if 'B-V' in HGline[2] and 'G' in HGline[1]:
                     H = float(HGline[1].rstrip('G'))
                     G = float(HGline[2].rstrip('B-V'))
-            if ("Multiple major-bodies match string" in eph[idx] or
-               ("Matching small-bodies" in eph[idx] and not
-                "No matches found" in eph[idx+1])):
+            if ("Multiple major-bodies match string" in src[idx].decode('UTF-8') or
+               ("Matching small-bodies" in src[idx].decode('UTF-8') and not
+                "No matches found" in src[idx+1].decode('UTF-8'))):
                 raise ValueError('Ambiguous target name; check URL: %s' %
                                  url)
-            if ("Matching small-bodies" in eph[idx] and
-                "No matches found" in eph[idx+1]):
+            if ("Matching small-bodies" in src[idx].decode('UTF-8') and
+                "No matches found" in src[idx+1].decode('UTF-8')):
                 raise ValueError('Unknown target; check URL: %s' % url)
 
 
@@ -849,76 +873,80 @@ class query():
             # create a dictionary for each date (each line)
             for idx,item in enumerate(headerline):
                 if (item.find('JDTDB') > -1):                           
-                    this_el.append(float(line[idx]))
+                    this_el.append(np.float64(line[idx]))
                     fieldnames.append('datetime_jd')
-                    datatypes.append(float)
+                    datatypes.append(np.float64)
                 if (item.find('EC') > -1):                           
-                    this_el.append(float(line[idx]))
+                    this_el.append(np.float64(line[idx]))
                     fieldnames.append('e')
-                    datatypes.append(float)
+                    datatypes.append(np.float64)
                 if (item.find('QR') > -1):                           
-                    this_el.append(float(line[idx]))
+                    this_el.append(np.float64(line[idx]))
                     fieldnames.append('p')
-                    datatypes.append(float)
+                    datatypes.append(np.float64)
                 if (item.find('A') > -1) and len(item.strip()) == 1:
-                    this_el.append(float(line[idx]))
+                    this_el.append(np.float64(line[idx]))
                     fieldnames.append('a')
-                    datatypes.append(float)
+                    datatypes.append(np.float64)
                 if (item.find('IN') > -1):                           
-                    this_el.append(float(line[idx]))
+                    this_el.append(np.float64(line[idx]))
                     fieldnames.append('incl')
-                    datatypes.append(float)
+                    datatypes.append(np.float64)
                 if (item.find('OM') > -1):                           
-                    this_el.append(float(line[idx]))
+                    this_el.append(np.float64(line[idx]))
                     fieldnames.append('node')
-                    datatypes.append(float)
+                    datatypes.append(np.float64)
                 if (item.find('W') > -1):                           
-                    this_el.append(float(line[idx]))
+                    this_el.append(np.float64(line[idx]))
                     fieldnames.append('argper')
-                    datatypes.append(float)
+                    datatypes.append(np.float64)
                 if (item.find('Tp') > -1):                           
-                    this_el.append(float(line[idx]))
+                    this_el.append(np.float64(line[idx]))
                     fieldnames.append('Tp')
-                    datatypes.append(float)
+                    datatypes.append(np.float64)
                 if (item.find('MA') > -1):                           
-                    this_el.append(float(line[idx]))
+                    this_el.append(np.float64(line[idx]))
                     fieldnames.append('meananomaly')
-                    datatypes.append(float)
+                    datatypes.append(np.float64)
                 if (item.find('TA') > -1):                           
-                    this_el.append(float(line[idx]))
+                    this_el.append(np.float64(line[idx]))
                     fieldnames.append('trueanomaly')
-                    datatypes.append(float)
+                    datatypes.append(np.float64)
                 if (item.find('PR') > -1):                           
-                    this_el.append(float(line[idx])/(365.256)) # Earth years
+                    this_el.append(np.float64(line[idx])/(365.256)) # Earth years
                     fieldnames.append('period')
-                    datatypes.append(float)
+                    datatypes.append(np.float64)
                 if (item.find('AD') > -1):                           
-                    this_el.append(float(line[idx]))
+                    this_el.append(np.float64(line[idx]))
                     fieldnames.append('Q')
-                    datatypes.append(float)
+                    datatypes.append(np.float64)
+
+            # append targetname
             this_el.append(targetname)
             fieldnames.append('targetname')
             datatypes.append(object)
-            try:
-                this_el.append(H)
-                fieldnames.append('H')
-                datatypes.append(float)
-                this_el.append(G)
-                fieldnames.append('G')
-                datatypes.append(float)
-            except UnboundLocalError:
-                pass
+
+            # append H
+            this_el.append(H)
+            fieldnames.append('H')
+            datatypes.append(np.float64)
+
+            # append G
+            this_el.append(G)
+            fieldnames.append('G')
+            datatypes.append(np.float64)
 
             if len(this_el) > 0:
                 elements.append(tuple(this_el))
 
         if len(elements) == 0:
             return 0
-                
+
+        
         # combine elements with column names and data types into ndarray
         assert len(elements[0]) == len(fieldnames) == len(datatypes)
-        self.data = numpy.array(elements, 
-                               dtype=[(fieldnames[i], datatypes[i]) for i 
+        self.data = np.array(elements, 
+                               dtype=[(str(fieldnames[i]), datatypes[i]) for i 
                                       in range(len(fieldnames))])
 
         return len(self)
@@ -957,24 +985,23 @@ class query():
         >>> nau.lat = 35.184108/180.*numpy.pi
         >>> nau.elevation = 2100 # m
         >>> nau.date = '2015/10/5 01:23' # UT 
-        >>> print 'next rising: %s' % nau.next_rising(ceres_pyephem[0])
-        >>> print 'next transit: %s' % nau.next_transit(ceres_pyephem[0])
-        >>> print 'next setting: %s' % nau.next_setting(ceres_pyephem[0])
+        >>> print ('next rising: %s' % nau.next_rising(ceres_pyephem[0]))
+        >>> print ('next transit: %s' % nau.next_transit(ceres_pyephem[0]))
+        >>> print ('next setting: %s' % nau.next_setting(ceres_pyephem[0]))
 
         """
 
         try:
             import ephem
         except ImportError:
-            print "ERROR: cannot import module PyEphem"
-            return None
+            raise ImportError('export2pyephem requires PyEphem to be installed')
 
         # obtain orbital elements
         self.get_elements(center)
 
         objects = []
         for el in self.data:
-            n = 0.9856076686/numpy.sqrt(el['a']**3) # mean daily motion
+            n = 0.9856076686/np.sqrt(el['a']**3) # mean daily motion
             epoch_djd = el['datetime_jd']-2415020.0  # Dublin Julian date
             epoch = ephem.date(epoch_djd)
             epoch_str = "%d/%f/%d" %(epoch.triple()[1], epoch.triple()[2], 

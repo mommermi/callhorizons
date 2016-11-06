@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>callhorizons module &mdash; CALLHORIZONS 0.9 documentation</title>
+    <title>callhorizons module &#8212; CALLHORIZONS 0.9 documentation</title>
     
     <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -46,8 +46,8 @@
         <li class="right" >
           <a href="modules.html" title="callhorizons"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="readme.html">CALLHORIZONS 0.9 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="modules.html" accesskey="U">callhorizons</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="readme.html">CALLHORIZONS 0.9 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" accesskey="U">callhorizons</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -65,14 +65,11 @@
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -85,7 +82,7 @@
             
   <div class="section" id="callhorizons-module">
 <h1>callhorizons module<a class="headerlink" href="#callhorizons-module" title="Permalink to this headline">¶</a></h1>
-<span class="target" id="module-callhorizons"><span id="reference"></span></span><p>CALLHORIZONS - a Python 2.7 interface to access JPL HORIZONS
+<span class="target" id="module-callhorizons"><span id="reference"></span></span><p>CALLHORIZONS - a Python interface to access JPL HORIZONS
 ephemerides and orbital elements.</p>
 <p>This module provides a convenient python interface to the JPL
 HORIZONS system by directly accessing and parsing the HORIZONS
@@ -94,7 +91,8 @@ orbital elements through get_elements. Function
 export2pyephem provides an interface to the PyEphem module.</p>
 <p>michael.mommert (at) nau.edu, latest version: v1.0.1, 2016-07-19.
 This code is inspired by code created by Alex Hagen.</p>
-<p>v1.0.1: get_ephemerides fixed
+<p>v1.0.2: Python 3.5 compatibility implemented
+v1.0.1: get_ephemerides fixed
 v1.0:   bugfixes completed, planets/satellites accessible, too
 v0.9:   first release</p>
 <dl class="class">
@@ -180,7 +178,7 @@ v0.9:   first release</p>
 
 <dl class="method">
 <dt id="callhorizons.query.export2pyephem">
-<code class="descname">export2pyephem</code><span class="sig-paren">(</span><em>center='500&#64;10'</em>, <em>equinox=2000.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/callhorizons.html#query.export2pyephem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#callhorizons.query.export2pyephem" title="Permalink to this definition">¶</a></dt>
+<code class="descname">export2pyephem</code><span class="sig-paren">(</span><em>center=u'500&#64;10'</em>, <em>equinox=2000.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/callhorizons.html#query.export2pyephem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#callhorizons.query.export2pyephem" title="Permalink to this definition">¶</a></dt>
 <dd><p>Call JPL HORIZONS website to obtain orbital elements based on the
 provided targetname, epochs, and center code and create a
 PyEphem (<a class="reference external" href="http://rhodesmill.org/pyephem/">http://rhodesmill.org/pyephem/</a>) object. This function
@@ -202,24 +200,24 @@ requires PyEphem to be installed.</p>
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">callhorizons</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">callhorizons</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">ephem</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ceres</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;Ceres&#39;</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ceres</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;Ceres&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ceres</span><span class="o">.</span><span class="n">set_epochrange</span><span class="p">(</span><span class="s1">&#39;2016-02-23 00:00&#39;</span><span class="p">,</span> <span class="s1">&#39;2016-02-24 00:00&#39;</span><span class="p">,</span> <span class="s1">&#39;1h&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ceres_pyephem</span> <span class="o">=</span> <span class="n">ceres</span><span class="o">.</span><span class="n">export2pyephem</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">nau</span> <span class="o">=</span> <span class="n">ephem</span><span class="o">.</span><span class="n">Observer</span><span class="p">()</span> <span class="c1"># setup observer site</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">nau</span> <span class="o">=</span> <span class="n">ephem</span><span class="o">.</span><span class="n">Observer</span><span class="p">()</span> <span class="c1"># setup observer site</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">nau</span><span class="o">.</span><span class="n">lon</span> <span class="o">=</span> <span class="o">-</span><span class="mf">111.653152</span><span class="o">/</span><span class="mf">180.</span><span class="o">*</span><span class="n">numpy</span><span class="o">.</span><span class="n">pi</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">nau</span><span class="o">.</span><span class="n">lat</span> <span class="o">=</span> <span class="mf">35.184108</span><span class="o">/</span><span class="mf">180.</span><span class="o">*</span><span class="n">numpy</span><span class="o">.</span><span class="n">pi</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">nau</span><span class="o">.</span><span class="n">elevation</span> <span class="o">=</span> <span class="mi">2100</span> <span class="c1"># m</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">nau</span><span class="o">.</span><span class="n">date</span> <span class="o">=</span> <span class="s1">&#39;2015/10/5 01:23&#39;</span> <span class="c1"># UT </span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s1">&#39;next rising: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nau</span><span class="o">.</span><span class="n">next_rising</span><span class="p">(</span><span class="n">ceres_pyephem</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s1">&#39;next transit: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nau</span><span class="o">.</span><span class="n">next_transit</span><span class="p">(</span><span class="n">ceres_pyephem</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s1">&#39;next setting: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nau</span><span class="o">.</span><span class="n">next_setting</span><span class="p">(</span><span class="n">ceres_pyephem</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;next rising: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nau</span><span class="o">.</span><span class="n">next_rising</span><span class="p">(</span><span class="n">ceres_pyephem</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;next transit: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nau</span><span class="o">.</span><span class="n">next_transit</span><span class="p">(</span><span class="n">ceres_pyephem</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;next setting: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nau</span><span class="o">.</span><span class="n">next_setting</span><span class="p">(</span><span class="n">ceres_pyephem</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -232,7 +230,7 @@ requires PyEphem to be installed.</p>
 
 <dl class="method">
 <dt id="callhorizons.query.get_elements">
-<code class="descname">get_elements</code><span class="sig-paren">(</span><em>center='500&#64;10'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/callhorizons.html#query.get_elements"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#callhorizons.query.get_elements" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_elements</code><span class="sig-paren">(</span><em>center=u'500&#64;10'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/callhorizons.html#query.get_elements"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#callhorizons.query.get_elements" title="Permalink to this definition">¶</a></dt>
 <dd><p>Call JPL HORIZONS website to obtain orbital elements based on the
 provided targetname, epochs, and center code. For valid center
 codes, please refer to <a class="reference external" href="http://ssd.jpl.nasa.gov/horizons.cgi">http://ssd.jpl.nasa.gov/horizons.cgi</a></p>
@@ -249,9 +247,9 @@ codes, please refer to <a class="reference external" href="http://ssd.jpl.nasa.g
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ceres</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;Ceres&#39;</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ceres</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;Ceres&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ceres</span><span class="o">.</span><span class="n">set_epochrange</span><span class="p">(</span><span class="s1">&#39;2016-02-23 00:00&#39;</span><span class="p">,</span> <span class="s1">&#39;2016-02-24 00:00&#39;</span><span class="p">,</span> <span class="s1">&#39;1h&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">ceres</span><span class="o">.</span><span class="n">get_elements</span><span class="p">(),</span> <span class="s1">&#39;epochs queried&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span> <span class="p">(</span><span class="n">ceres</span><span class="o">.</span><span class="n">get_elements</span><span class="p">(),</span> <span class="s1">&#39;epochs queried&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <dl class="docutils">
@@ -350,9 +348,9 @@ of valid observatory codes, refer to
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ceres</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;Ceres&#39;</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ceres</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;Ceres&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ceres</span><span class="o">.</span><span class="n">set_epochrange</span><span class="p">(</span><span class="s1">&#39;2016-02-23 00:00&#39;</span><span class="p">,</span> <span class="s1">&#39;2016-02-24 00:00&#39;</span><span class="p">,</span> <span class="s1">&#39;1h&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">ceres</span><span class="o">.</span><span class="n">get_ephemerides</span><span class="p">(</span><span class="mi">568</span><span class="p">),</span> <span class="s1">&#39;epochs queried&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span> <span class="p">(</span><span class="n">ceres</span><span class="o">.</span><span class="n">get_ephemerides</span><span class="p">(</span><span class="mi">568</span><span class="p">),</span> <span class="s1">&#39;epochs queried&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <dl class="docutils">
@@ -500,7 +498,7 @@ Dates</p>
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">callhorizons</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">callhorizons</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ceres</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;Ceres&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ceres</span><span class="o">.</span><span class="n">set_discreteepochs</span><span class="p">([</span><span class="mf">2457446.177083</span><span class="p">,</span> <span class="mf">2457446.182343</span><span class="p">])</span>
 </pre></div>
@@ -536,7 +534,7 @@ Dates</p>
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">callhorizons</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">callhorizons</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ceres</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;Ceres&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ceres</span><span class="o">.</span><span class="n">set_epochrange</span><span class="p">(</span><span class="s1">&#39;2016-02-26&#39;</span><span class="p">,</span> <span class="s1">&#39;2016-10-25&#39;</span><span class="p">,</span> <span class="s1">&#39;1d&#39;</span><span class="p">)</span>
 </pre></div>
@@ -566,13 +564,13 @@ Dates</p>
         <li class="right" >
           <a href="modules.html" title="callhorizons"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="readme.html">CALLHORIZONS 0.9 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="modules.html" >callhorizons</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="readme.html">CALLHORIZONS 0.9 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >callhorizons</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright 2016, Michael Mommert.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.5.
+        &#169; Copyright 2016, Michael Mommert.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.6.
     </div>
   </body>
 </html>

@@ -64,6 +64,8 @@ michael.mommert (at) nau.edu, latest version: v0.9, 2016-02-27
 Changelog
 ---------
 
+* 2016-11-06: implemented tests and Python 3.5 support, v1.0.2
+
 * 2016-09-12: bugfix in get_elements, v1.0.1
 
 * 2016-07-19: implemented query for non-asteroidal objects (planets and satellits), v1.0

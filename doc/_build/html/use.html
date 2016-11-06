@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>How to Use It? &mdash; CALLHORIZONS 0.9 documentation</title>
+    <title>How to Use It? &#8212; CALLHORIZONS 0.9 documentation</title>
     
     <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -49,7 +49,7 @@
         <li class="right" >
           <a href="install.html" title="Installation"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="readme.html">CALLHORIZONS 0.9 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="readme.html">CALLHORIZONS 0.9 documentation</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -70,14 +70,11 @@
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -92,25 +89,25 @@
 <h1>How to Use It?<a class="headerlink" href="#how-to-use-it" title="Permalink to this headline">¶</a></h1>
 <ol class="arabic">
 <li><p class="first">import the module into your code:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">callhorizons</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">callhorizons</span>
 </pre></div>
 </div>
 </li>
 <li><p class="first">initialize a QUERY object with an objectname that is readable by
 the <a class="reference external" href="http://ssd.jpl.nasa.gov/horizons.cgi">JPL HORIZONS</a> website; this might be the target asteroid&#8217;s name:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">dq</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;Don Quixote&#39;</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dq</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;Don Quixote&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>number:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">dq</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;3552&#39;</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dq</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;3552&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>designation:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">dq</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;1983 SA&#39;</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dq</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;1983 SA&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>or packed designation:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">dq</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;J83S00A&#39;</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dq</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;J83S00A&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>You can also query <strong>major bodies</strong> (planets and moons) and
@@ -119,7 +116,7 @@ clear naming conventions for these objects, causing ambiguities
 (see the <a class="reference external" href="http://ssd.jpl.nasa.gov/?horizons_doc#selection">Horizons documentation</a> for a discussion). Assume that
 we want to select Jupiter&#8217;s moon Io, we would could use the
 following line:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">io</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;Io&#39;</span><span class="p">,</span> <span class="n">smallbody</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">io</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;Io&#39;</span><span class="p">,</span> <span class="n">smallbody</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Please note the flag <code class="docutils literal"><span class="pre">smallbody=False</span></code>, which is necessary
@@ -130,7 +127,7 @@ provided URL explains the problem. Horizons selects all known
 objects that contain the letters <cite>io</cite>. In order to unambiguously
 refer to Jupiter&#8217;s moon Io, one has to use the provided ID number,
 which is 501. Hence, one should use:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">io</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="mi">501</span><span class="p">,</span> <span class="n">smallbody</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">io</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="mi">501</span><span class="p">,</span> <span class="n">smallbody</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Every target listed in Horizons provides an ID number, allowing for
@@ -141,13 +138,13 @@ explanations. Spacecraft can be selected the same way, also
 requiring the <code class="docutils literal"><span class="pre">smallbody=False</span></code> flag.</p>
 </li>
 <li><p class="first">set the time range of epochs that you want to query using:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">dq</span><span class="o">.</span><span class="n">set_epochrange</span><span class="p">(</span><span class="s1">&#39;2016-02-27 03:20&#39;</span><span class="p">,</span> <span class="s1">&#39;2016-02-28 05:20&#39;</span><span class="p">,</span> <span class="s1">&#39;1h&#39;</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dq</span><span class="o">.</span><span class="n">set_epochrange</span><span class="p">(</span><span class="s1">&#39;2016-02-27 03:20&#39;</span><span class="p">,</span> <span class="s1">&#39;2016-02-28 05:20&#39;</span><span class="p">,</span> <span class="s1">&#39;1h&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>where the order is <cite>start date and time</cite>, <cite>end date and time</cite>, and
 <cite>step size</cite> using <cite>YYYY-MM-DD HH:MM</cite> UT times, or set discrete
 times:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">dq</span><span class="o">.</span><span class="n">set_discreteepochs</span><span class="p">([</span><span class="mf">2457446.177083</span><span class="p">,</span> <span class="mf">2457446.182343</span><span class="p">])</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dq</span><span class="o">.</span><span class="n">set_discreteepochs</span><span class="p">([</span><span class="mf">2457446.177083</span><span class="p">,</span> <span class="mf">2457446.182343</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>where up to 15 discrete epochs are provided in the form of a list of
@@ -155,18 +152,18 @@ Julian Dates.</p>
 </li>
 <li><p class="first">query ephemerides for the given times for a given observatory code
 (here: 568, Mauna Kea):</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">dq</span><span class="o">.</span><span class="n">get_ephemerides</span><span class="p">(</span><span class="mi">568</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dq</span><span class="o">.</span><span class="n">get_ephemerides</span><span class="p">(</span><span class="mi">568</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>or, obtain the target&#8217;s orbital elements:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">dq</span><span class="o">.</span><span class="n">get_elements</span><span class="p">()</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dq</span><span class="o">.</span><span class="n">get_elements</span><span class="p">()</span>
 </pre></div>
 </div>
 </li>
 </ol>
 <p>The queried data are stored in the <cite>QUERY</cite> object and can be accessed
 easily:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">dq</span><span class="o">.</span><span class="n">fields</span>   <span class="c1"># provide list of available target properties</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dq</span><span class="o">.</span><span class="n">fields</span>   <span class="c1"># provide list of available target properties</span>
 <span class="n">dq</span><span class="p">[</span><span class="s1">&#39;RA&#39;</span><span class="p">]</span>    <span class="c1"># access &#39;RA&#39; for all epochs</span>
 <span class="n">dq</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>       <span class="c1"># access all properties for the first epoch</span>
 <span class="n">dq</span><span class="o">.</span><span class="n">dates</span>    <span class="c1"># provide list of epochs</span>
@@ -174,24 +171,24 @@ easily:</p>
 </pre></div>
 </div>
 <p>Queried data can also be filtered, e.g., based on airmass:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">dq</span><span class="p">[</span><span class="n">dq</span><span class="p">[</span><span class="s1">&#39;airmass&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">1.5</span><span class="p">]</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dq</span><span class="p">[</span><span class="n">dq</span><span class="p">[</span><span class="s1">&#39;airmass&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">1.5</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>Orbital elements queried with CALLHORIZONS can be directly converted
 into PyEphem objects to calculate the ephemerides:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">ephem</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">ephem</span>
 <span class="n">dq</span><span class="o">.</span><span class="n">get_elements</span><span class="p">()</span>
 <span class="n">dq_pyephem</span> <span class="o">=</span> <span class="n">dq</span><span class="o">.</span><span class="n">export2pyephem</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>Once ephemerides or orbital elements have been queried, the URL with
 which HOrizons has been called can be listed:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">print</span> <span class="n">dq</span><span class="o">.</span><span class="n">query</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">dq</span><span class="o">.</span><span class="n">query</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>This is especially useful for debugging and finding out why a query
 might have failed.</p>
-<p>For more information, see the <a class="reference internal" href="examples.html"><em>Examples</em></a> and the <a class="reference internal" href="modules.html"><em>callhorizons</em></a> reference.</p>
+<p>For more information, see the <a class="reference internal" href="examples.html"><span class="doc">Examples</span></a> and the <a class="reference internal" href="modules.html"><span class="doc">callhorizons</span></a> reference.</p>
 </div>
 
 
@@ -215,12 +212,12 @@ might have failed.</p>
         <li class="right" >
           <a href="install.html" title="Installation"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="readme.html">CALLHORIZONS 0.9 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="readme.html">CALLHORIZONS 0.9 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright 2016, Michael Mommert.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.5.
+        &#169; Copyright 2016, Michael Mommert.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.6.
     </div>
   </body>
 </html>

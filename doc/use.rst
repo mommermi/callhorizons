@@ -96,7 +96,7 @@ into PyEphem objects to calculate the ephemerides::
 Once ephemerides or orbital elements have been queried, the URL with
 which HOrizons has been called can be listed::
 
-  print dq.query
+  print(dq.query)
 
 This is especially useful for debugging and finding out why a query
 might have failed.
