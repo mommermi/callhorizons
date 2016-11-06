@@ -58,7 +58,7 @@ Contact
 
 Feel free to contact me with your suggestions and comments!
 
-michael.mommert (at) nau.edu, latest version: v0.9, 2016-02-27
+michael.mommert (at) nau.edu
 
 
 Changelog
