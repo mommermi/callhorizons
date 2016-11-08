@@ -64,6 +64,8 @@ michael.mommert (at) nau.edu
 Changelog
 ---------
 
+* 2016-11-08: added ObsEclLon and ObsEclLat to get_ephemerides()
+
 * 2016-11-06: implemented tests and Python 3.5 support, v1.0.2
 
 * 2016-09-12: bugfix in get_elements, v1.0.1

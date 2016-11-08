@@ -11,6 +11,7 @@ michael.mommert (at) nau.edu, latest version: v1.0.1, 2016-07-19.
 This code is inspired by code created by Alex Hagen.
 
 
+v1.0.3: ObsEclLon and ObsEclLat added to get_ephemerides
 v1.0.2: Python 3.5 compatibility implemented
 v1.0.1: get_ephemerides fixed
 v1.0:   bugfixes completed, planets/satellites accessible, too
@@ -289,6 +290,10 @@ class query():
            +------------------+-----------------------------------------------+
            | EclLat           | heliocentr. ecl. lat. (float, deg, J2000.0)   |
            +------------------+-----------------------------------------------+
+           | ObsEclLon        | obscentr. ecl. long. (float, deg, J2000.0)    |
+           +------------------+-----------------------------------------------+
+           | ObsEclLat        | obscentr. ecl. lat. (float, deg, J2000.0)     |
+           +------------------+-----------------------------------------------+
            | r                | heliocentric distance (float, au)             |
            +------------------+-----------------------------------------------+
            | r_rate           | heliocentric radial rate  (float, km/s)       |
@@ -322,7 +327,7 @@ class query():
         
         # queried fields (see HORIZONS website for details)
         # if fields are added here, also update the field identification below
-        quantities = '1,3,4,8,9,10,18,19,20,21,23,24,27,33,36'
+        quantities = '1,3,4,8,9,10,18,19,20,21,23,24,27,31,33,36'
 
         # encode objectname for use in URL
         objectname = urllib.quote(self.targetname.encode("utf8"))
@@ -554,6 +559,20 @@ class query():
                     except ValueError:
                         this_eph.append(np.nan)
                     fieldnames.append('EclLat')
+                    datatypes.append(np.float64)
+                if (item.find('ObsEcLon') > -1):
+                    try:              
+                        this_eph.append(np.float64(line[idx]))
+                    except ValueError:
+                        this_eph.append(np.nan)
+                    fieldnames.append('ObsEclLon')
+                    datatypes.append(np.float64)
+                if (item.find('ObsEcLat') > -1):
+                    try:
+                        this_eph.append(np.float64(line[idx]))
+                    except ValueError:
+                        this_eph.append(np.nan)
+                    fieldnames.append('ObsEclLat')
                     datatypes.append(np.float64)
                 if (item.find('  r') > -1) and \
                    (headerline[idx+1].find("rdot") > -1):
