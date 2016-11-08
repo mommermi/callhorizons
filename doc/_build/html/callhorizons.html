@@ -91,7 +91,8 @@ orbital elements through get_elements. Function
 export2pyephem provides an interface to the PyEphem module.</p>
 <p>michael.mommert (at) nau.edu, latest version: v1.0.1, 2016-07-19.
 This code is inspired by code created by Alex Hagen.</p>
-<p>v1.0.2: Python 3.5 compatibility implemented
+<p>v1.0.3: ObsEclLon and ObsEclLat added to get_ephemerides
+v1.0.2: Python 3.5 compatibility implemented
 v1.0.1: get_ephemerides fixed
 v1.0:   bugfixes completed, planets/satellites accessible, too
 v0.9:   first release</p>
@@ -422,6 +423,12 @@ of valid observatory codes, refer to
 </tr>
 <tr class="row-even"><td>EclLat</td>
 <td>heliocentr. ecl. lat. (float, deg, J2000.0)</td>
+</tr>
+<tr class="row-odd"><td>ObsEclLon</td>
+<td>obscentr. ecl. long. (float, deg, J2000.0)</td>
+</tr>
+<tr class="row-even"><td>ObsEclLat</td>
+<td>obscentr. ecl. lat. (float, deg, J2000.0)</td>
 </tr>
 <tr class="row-odd"><td>r</td>
 <td>heliocentric distance (float, au)</td>

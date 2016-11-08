@@ -80,6 +80,7 @@
 <span class="sd">This code is inspired by code created by Alex Hagen.</span>
 
 
+<span class="sd">v1.0.3: ObsEclLon and ObsEclLat added to get_ephemerides</span>
 <span class="sd">v1.0.2: Python 3.5 compatibility implemented</span>
 <span class="sd">v1.0.1: get_ephemerides fixed</span>
 <span class="sd">v1.0:   bugfixes completed, planets/satellites accessible, too</span>
@@ -358,6 +359,10 @@
 <span class="sd">           +------------------+-----------------------------------------------+</span>
 <span class="sd">           | EclLat           | heliocentr. ecl. lat. (float, deg, J2000.0)   |</span>
 <span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | ObsEclLon        | obscentr. ecl. long. (float, deg, J2000.0)    |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
+<span class="sd">           | ObsEclLat        | obscentr. ecl. lat. (float, deg, J2000.0)     |</span>
+<span class="sd">           +------------------+-----------------------------------------------+</span>
 <span class="sd">           | r                | heliocentric distance (float, au)             |</span>
 <span class="sd">           +------------------+-----------------------------------------------+</span>
 <span class="sd">           | r_rate           | heliocentric radial rate  (float, km/s)       |</span>
@@ -391,7 +396,7 @@
         
         <span class="c1"># queried fields (see HORIZONS website for details)</span>
         <span class="c1"># if fields are added here, also update the field identification below</span>
-        <span class="n">quantities</span> <span class="o">=</span> <span class="s1">&#39;1,3,4,8,9,10,18,19,20,21,23,24,27,33,36&#39;</span>
+        <span class="n">quantities</span> <span class="o">=</span> <span class="s1">&#39;1,3,4,8,9,10,18,19,20,21,23,24,27,31,33,36&#39;</span>
 
         <span class="c1"># encode objectname for use in URL</span>
         <span class="n">objectname</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targetname</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">))</span>
@@ -623,6 +628,20 @@
                     <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
                         <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
                     <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;EclLat&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;ObsEcLon&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>              
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;ObsEclLon&#39;</span><span class="p">)</span>
+                    <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;ObsEcLat&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                        <span class="n">this_eph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+                    <span class="n">fieldnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;ObsEclLat&#39;</span><span class="p">)</span>
                     <span class="n">datatypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
                 <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;  r&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="ow">and</span> \
                    <span class="p">(</span><span class="n">headerline</span><span class="p">[</span><span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;rdot&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
