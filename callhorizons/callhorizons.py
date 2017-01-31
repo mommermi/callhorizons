@@ -68,10 +68,99 @@ class query():
         
         return None
 
+    ### small body designation parsing
+
+    def parse_comet(self):
+        """Parse `targetname` as if it were a comet.
+
+        Returns
+        -------
+        des : string or None
+          The designation of the comet or `None` if `targetname` does
+          not appear to be a comet name.  Note that comets starting
+          with 'X/' are allowed, but this designation indicates a
+          comet without an orbit, so `query()` should fail.
+
+        Examples
+        --------
+        targetname                      des
+        1P/Halley                       1P
+        3D/Biela                        3D
+        9P/Tempel 1                     9P
+        73P/Schwassmann Wachmann 3 C    73P         # Note the missing "C"!
+        73P-C/Schwassmann Wachmann 3 C  73P-C
+        73P-BB                          73P-BB
+        322P                            322P
+        X/1106 C1                       X/1106 C1
+        P/1994 N2 (McNaught-Hartley)    P/1994 N2
+        P/2001 YX127 (LINEAR)           P/2001 YX127
+        C/-146 P1                       C/-146 P1  
+        C/2001 A2-A (LINEAR)            C/2001 A2-A
+        C/2013 US10                     C/2013 US10
+        C/2015 V2 (Johnson)             C/2015 V2
+
+        """
+
+        import re
+
+        pat = ('^(([1-9]{1}[0-9]*[PD](-[A-Z]{1,2})?)'
+               '|([CPX]/-?[0-9]{1,4} [A-Z]{1,2}[1-9][0-9]{0,2}(-[A-Z]{1,2})?))')
+
+        m = re.findall(pat, self.targetname.strip())
+        if len(m) == 0:
+            return None
+        else:
+            return m[0][0]
+
+    def parse_asteroid(self):
+        """Parse `targetname` as if it were a asteroid.
+
+        Returns
+        -------
+        des : string or None
+          The designation of the asteroid or `None` if `targetname` does
+          not appear to be an asteroid name.
+
+        Examples
+        --------
+        targetname        des
+        1                 1
+        (2) Pallas        2
+        (2001) Einstein   2001
+        2001 AT1          2001 AT1
+        (1714) Sy         1714
+        1714 SY           1714 SY    # Note the near-confusion with (1714)
+        2014 MU69         2014 MU69
+        2017 AA           2017 AA
+
+        """
+
+        import re
+
+        pat = ('^(([1-9][0-9]*( [A-Z]{1,2}([1-9][0-9]{0,2})?)?)'
+               '|(\(([1-9][0-9]*)\)))')
+
+        m = re.findall(pat, self.targetname.strip())
+        if len(m) == 0:
+            return None
+        else:
+            if len(m[0][5]) > 0:
+                return m[0][5]
+            else:
+                return m[0][0]
+
+    def iscomet(self):
+        """`True` if `targetname` appears to be a comet."""
+        return self.parse_comet() is not None
+
+    def isasteroid(self):
+        """`True` if `targetname` appears to be an asteroid."""
+        return self.parse_asteroid() is not None
 
     ### set epochs
 
     def set_epochrange(self, start_epoch, stop_epoch, step_size):
+
         """Set a range of epochs, all times are UT
 
         Parameters
@@ -348,6 +437,16 @@ class query():
         if self.not_smallbody:
             url += "&COMMAND='" + \
                    urllib.quote(self.targetname.encode("utf8")) + "'"
+        elif self.iscomet():
+            # for comets, use 'DES="designation";CAP'
+            des = self.parse_comet()
+            url += "&COMMAND='DES=" + \
+                   urllib.quote(des.encode("utf8")) + "%3BCAP'"
+        elif self.isasteroid():
+            # for asteroids, use 'DES="designation";'
+            des = self.parse_asteroid()
+            url += "&COMMAND='DES=" + \
+                   urllib.quote(des.encode("utf8")) + "%3B'"
         elif (not self.targetname.replace(' ', '').isalpha() and not
              self.targetname.isdigit() and not
              self.targetname.islower() and not

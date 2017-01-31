@@ -105,10 +105,51 @@ def test_pyephem():
     assert ((target['RA'][0]-ephem_ra)*3600) < 0.1
     assert ((target['DEC'][0]-ephem_dec)*3600) < 0.1
     assert (target['V'][0]-ephem_mag) < 0.1
-    
+
+
+def test_designations():
+    """Test comet and asteroid name to designation transformations."""
+    comets = {
+        '1P/Halley': '1P',
+        '3D/Biela': '3D',
+        '9P/Tempel 1': '9P',
+        '73P/Schwassmann Wachmann 3 C': '73P',  # Note the missing "C"!
+        '73P-C/Schwassmann Wachmann 3 C': '73P-C',
+        '73P-BB': '73P-BB',
+        '322P': '322P',
+        'X/1106 C1': 'X/1106 C1',
+        'P/1994 N2 (McNaught-Hartley)': 'P/1994 N2',
+        'P/2001 YX127 (LINEAR)': 'P/2001 YX127',
+        'C/-146 P1': 'C/-146 P1' ,
+        'C/2001 A2-A (LINEAR)': 'C/2001 A2-A',
+        'C/2013 US10': 'C/2013 US10',
+        'C/2015 V2 (Johnson)': 'C/2015 V2',
+    }
+
+    asteroids = {
+        '1': '1',
+        '(2) Pallas': '2',
+        '(2001) Einstein': '2001',
+        '2001 AT1': '2001 AT1',
+        '(1714) Sy': '1714',
+        '1714 SY': '1714 SY',
+        '2014 MU69': '2014 MU69',
+        '2017 AA': '2017 AA',
+    }
+
+    for comet, des in comets.items():
+        q = callhorizons.query(comet, smallbody=True)
+        _des = q.parse_comet() 
+        assert _des == des, 'Parsed {}: {} != {}'.format(comet, _des, des)
+
+    for asteroid, des in asteroids.items():
+        q = callhorizons.query(asteroid, smallbody=True)
+        _des = q.parse_asteroid()
+        assert _des == des, 'Parsed {}: {} != {}'.format(asteroid, _des, des)
+        
     
 if __name__ == "__main__":
     test_ephemerides()
     test_elements()
     test_pyephem()
-
+    test_designations()
