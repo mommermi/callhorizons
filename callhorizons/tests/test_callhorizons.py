@@ -109,6 +109,8 @@ def test_pyephem():
 
 def test_designations():
     """Test comet and asteroid name to designation transformations."""
+
+    # name: expected result
     comets = {
         '1P/Halley': '1P',
         '3D/Biela': '3D',
@@ -132,7 +134,7 @@ def test_designations():
         '(2001) Einstein': '2001',
         '2001 AT1': '2001 AT1',
         '(1714) Sy': '1714',
-        '1714 SY': '1714 SY',
+        '1714 SY': '1714 SY',  # not real; note pot. confusion with prev. item
         '2014 MU69': '2014 MU69',
         '2017 AA': '2017 AA',
     }
@@ -146,10 +148,35 @@ def test_designations():
         q = callhorizons.query(asteroid, smallbody=True)
         _des = q.parse_asteroid()
         assert _des == des, 'Parsed {}: {} != {}'.format(asteroid, _des, des)
-        
+
+def test_comet():
+    """Test CAP and orbit record numbers for a comet."""
+    
+    # test failure when multiple orbital solutions are available
+    target = callhorizons.query('9P', cap=False)
+    target.set_discreteepochs([2451544.500000])
+
+    try:
+        target.get_ephemerides('G37')
+    except ValueError as e:
+        assert 'Ambiguous target name' in str(e)
+    else:
+        raise
+
+    # switch to current ephemeris, this should be successful
+    target.cap = True
+    target.get_ephemerides('G37')
+    assert len(target) == 1
+
+    # Test orbit record number, note that NAIF may change these at any time.
+    target = callhorizons.query('900191')
+    target.set_discreteepochs([2451544.500000])
+    target.get_ephemerides('G37')
+    assert len(target) == 1
     
 if __name__ == "__main__":
     test_ephemerides()
     test_elements()
     test_pyephem()
     test_designations()
+    test_comet()

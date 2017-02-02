@@ -39,7 +39,7 @@ class query():
 
     ### constructor
 
-    def __init__(self, targetname, smallbody=True):
+    def __init__(self, targetname, smallbody=True, cap=True):
         """
         Initialize query to Horizons 
 
@@ -49,6 +49,8 @@ class query():
            HORIZONS-readable target number, name, or designation
         smallbody          : boolean
            use ``smallbody=False`` if targetname is a planet or spacecraft (optional, default: True)
+        cal                : boolean
+           set to `True` to return the current apparition for comet targets.
         
 
         Results
@@ -59,6 +61,7 @@ class query():
 
         self.targetname     = str(targetname)
         self.not_smallbody  = not smallbody
+        self.cap            = cap
         self.start_epoch    = None
         self.stop_epoch     = None
         self.step_size      = None
@@ -149,6 +152,18 @@ class query():
             else:
                 return m[0][0]
 
+    def isorbit_record(self):
+        """`True` if `targetname` appears to be a comet orbit record number.
+
+        NAIF record numbers are 6 digits, begin with a '9' and can
+        change at any time.
+
+        """
+        
+        import re
+        test = re.match('^9[0-9]{5}$', self.targetname.strip()) is not None
+        return test
+            
     def iscomet(self):
         """`True` if `targetname` appears to be a comet."""
         return self.parse_comet() is not None
@@ -432,16 +447,21 @@ class query():
               + str(solar_elongation[1]) + "'" \
               + "&CENTER='"+str(observatory_code)+"'"
 
-        # check if self.targetname is a designation
-        # lower case + upper case + numbers = pot. case sensitive designation
         if self.not_smallbody:
             url += "&COMMAND='" + \
                    urllib.quote(self.targetname.encode("utf8")) + "'"
+        elif self.isorbit_record():
+            # Comet orbit record. Do not use DES, CAP. This test must
+            # occur before asteroid test.
+            url += "&COMMAND='" + \
+                   urllib.quote(self.targetname.encode("utf8")) + "%3B'"
         elif self.iscomet():
-            # for comets, use 'DES="designation";CAP'
+            # for comets, potentially append the current appararition
+            # (CAP) parameter
             des = self.parse_comet()
             url += "&COMMAND='DES=" + \
-                   urllib.quote(des.encode("utf8")) + "%3BCAP'"
+                   urllib.quote(des.encode("utf8")) + "%3B" + \
+                   ("CAP'" if self.cap else "'")
         elif self.isasteroid():
             # for asteroids, use 'DES="designation";'
             des = self.parse_asteroid()
@@ -451,6 +471,7 @@ class query():
              self.targetname.isdigit() and not
              self.targetname.islower() and not
              self.targetname.isupper()):
+            # lower case + upper case + numbers = pot. case sensitive designation
             url += "&COMMAND='DES=" + \
                    urllib.quote(self.targetname.encode("utf8")) + "%3B'" 
         else:
