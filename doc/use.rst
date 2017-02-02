@@ -14,6 +14,10 @@ How to Use It?
 
      dq = callhorizons.query('3552')
 
+   name and number::
+
+     dq = callhorizons.query('(3552) Don Quixote')
+     
    designation::
 
      dq = callhorizons.query('1983 SA')
@@ -21,6 +25,52 @@ How to Use It?
    or packed designation::
 
      dq = callhorizons.query('J83S00A')
+
+   **Comet** names may be the full periodic number and name::
+
+     dq = callhorizons.query('1P/Halley')
+     dq = callhorizons.query('3D/Biela')
+
+   periodic number only::
+
+     dq = callhorizons.query('9P')
+
+   orbit solution ID::
+
+     dq = callhorizons.query('900190')
+     
+   temporary designation::
+
+     dq = callhorizons.query('P/2001 YX127')
+
+   temporary designation with name::
+
+     dq = callhorizons.query('P/1994 N2 (McNaught-Hartley)')
+
+   or long period / hyperbolic comet designation, with or without name::
+
+     dq = callhorizons.query('C/2013 US10 (Catalina)')     
+     dq = callhorizons.query('C/2012 S1')
+
+   Fragments may also be requested::
+  
+     dq = callhorizons.query('C/2001 A2-A')
+     dq = callhorizons.query('73P-C/Schwassmann Wachmann 3 C')
+
+   but note that the name is ignored.  The following will not return
+   fragment B, but instead the ephemeris for 73P (compare with the
+   previous example)::
+
+     dq = callhorizons.query('73P/Schwassmann Wachmann 3 B')
+
+   By default, comet queries will return the most recent or current
+   apparition (HORIZONS's 'CAP' parameter).  This behavior can be
+   disabled with the `cap=False` keyword argument::
+
+     dq = callhorizons.query('9P', cap=False)
+
+   If there are multiple orbit solutions available, CALLHORIZONS will
+   raise a ``ValueError`` and provide the URL with explanations.
 
    You can also query **major bodies** (planets and moons) and
    **spacecraft**. This is a little bit trickier, since there are no
