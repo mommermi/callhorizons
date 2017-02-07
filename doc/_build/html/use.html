@@ -102,6 +102,10 @@ the <a class="reference external" href="http://ssd.jpl.nasa.gov/horizons.cgi">JP
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dq</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;3552&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>name and number:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dq</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;(3552) Don Quixote&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
 <p>designation:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dq</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;1983 SA&#39;</span><span class="p">)</span>
 </pre></div>
@@ -110,6 +114,51 @@ the <a class="reference external" href="http://ssd.jpl.nasa.gov/horizons.cgi">JP
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dq</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;J83S00A&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
+<p><strong>Comet</strong> names may be the full periodic number and name:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dq</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;1P/Halley&#39;</span><span class="p">)</span>
+<span class="n">dq</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;3D/Biela&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>periodic number only:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dq</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;9P&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>orbit solution ID:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dq</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;900190&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>temporary designation:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dq</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;P/2001 YX127&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>temporary designation with name:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dq</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;P/1994 N2 (McNaught-Hartley)&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>or long period / hyperbolic comet designation, with or without name:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dq</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;C/2013 US10 (Catalina)&#39;</span><span class="p">)</span>
+<span class="n">dq</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;C/2012 S1&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Fragments may also be requested:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dq</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;C/2001 A2-A&#39;</span><span class="p">)</span>
+<span class="n">dq</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;73P-C/Schwassmann Wachmann 3 C&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>but note that the name is ignored.  The following will not return
+fragment B, but instead the ephemeris for 73P (compare with the
+previous example):</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dq</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;73P/Schwassmann Wachmann 3 B&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>By default, comet queries will return the most recent or current
+apparition (HORIZONS&#8217;s &#8216;CAP&#8217; parameter).  This behavior can be
+disabled with the <cite>cap=False</cite> keyword argument:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dq</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;9P&#39;</span><span class="p">,</span> <span class="n">cap</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If there are multiple orbit solutions available, CALLHORIZONS will
+raise a <code class="docutils literal"><span class="pre">ValueError</span></code> and provide the URL with explanations.</p>
 <p>You can also query <strong>major bodies</strong> (planets and moons) and
 <strong>spacecraft</strong>. This is a little bit trickier, since there are no
 clear naming conventions for these objects, causing ambiguities

@@ -98,7 +98,7 @@ v1.0:   bugfixes completed, planets/satellites accessible, too
 v0.9:   first release</p>
 <dl class="class">
 <dt id="callhorizons.query">
-<em class="property">class </em><code class="descclassname">callhorizons.</code><code class="descname">query</code><span class="sig-paren">(</span><em>targetname</em>, <em>smallbody=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/callhorizons.html#query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#callhorizons.query" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">callhorizons.</code><code class="descname">query</code><span class="sig-paren">(</span><em>targetname</em>, <em>smallbody=True</em>, <em>cap=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/callhorizons.html#query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#callhorizons.query" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
 <dt id="callhorizons.query.__getitem__">
 <code class="descname">__getitem__</code><span class="sig-paren">(</span><em>key</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/callhorizons.html#query.__getitem__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#callhorizons.query.__getitem__" title="Permalink to this definition">¶</a></dt>
@@ -122,7 +122,7 @@ v0.9:   first release</p>
 
 <dl class="method">
 <dt id="callhorizons.query.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>targetname</em>, <em>smallbody=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/callhorizons.html#query.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#callhorizons.query.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>targetname</em>, <em>smallbody=True</em>, <em>cap=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/callhorizons.html#query.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#callhorizons.query.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize query to Horizons</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -133,8 +133,12 @@ v0.9:   first release</p>
 <div><p>HORIZONS-readable target number, name, or designation</p>
 </div></blockquote>
 <p><strong>smallbody</strong> : boolean</p>
-<blockquote class="last">
+<blockquote>
 <div><p>use <code class="docutils literal"><span class="pre">smallbody=False</span></code> if targetname is a planet or spacecraft (optional, default: True)</p>
+</div></blockquote>
+<p><strong>cal</strong> : boolean</p>
+<blockquote class="last">
+<div><p>set to <cite>True</cite> to return the current apparition for comet targets.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -476,6 +480,92 @@ of valid observatory codes, refer to
 </table>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="callhorizons.query.isasteroid">
+<code class="descname">isasteroid</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/callhorizons.html#query.isasteroid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#callhorizons.query.isasteroid" title="Permalink to this definition">¶</a></dt>
+<dd><p><cite>True</cite> if <cite>targetname</cite> appears to be an asteroid.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="callhorizons.query.iscomet">
+<code class="descname">iscomet</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/callhorizons.html#query.iscomet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#callhorizons.query.iscomet" title="Permalink to this definition">¶</a></dt>
+<dd><p><cite>True</cite> if <cite>targetname</cite> appears to be a comet.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="callhorizons.query.isorbit_record">
+<code class="descname">isorbit_record</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/callhorizons.html#query.isorbit_record"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#callhorizons.query.isorbit_record" title="Permalink to this definition">¶</a></dt>
+<dd><p><cite>True</cite> if <cite>targetname</cite> appears to be a comet orbit record number.</p>
+<p>NAIF record numbers are 6 digits, begin with a &#8216;9&#8217; and can
+change at any time.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="callhorizons.query.parse_asteroid">
+<code class="descname">parse_asteroid</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/callhorizons.html#query.parse_asteroid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#callhorizons.query.parse_asteroid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse <cite>targetname</cite> as if it were a asteroid.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>des</strong> : string or None</p>
+<blockquote class="last">
+<div><p>The designation of the asteroid or <cite>None</cite> if <cite>targetname</cite> does
+not appear to be an asteroid name.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<p>targetname        des
+1                 1
+(2) Pallas        2
+(2001) Einstein   2001
+2001 AT1          2001 AT1
+(1714) Sy         1714
+1714 SY           1714 SY    # Note the near-confusion with (1714)
+2014 MU69         2014 MU69
+2017 AA           2017 AA</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="callhorizons.query.parse_comet">
+<code class="descname">parse_comet</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/callhorizons.html#query.parse_comet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#callhorizons.query.parse_comet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse <cite>targetname</cite> as if it were a comet.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>des</strong> : string or None</p>
+<blockquote class="last">
+<div><p>The designation of the comet or <cite>None</cite> if <cite>targetname</cite> does
+not appear to be a comet name.  Note that comets starting
+with &#8216;X/&#8217; are allowed, but this designation indicates a
+comet without an orbit, so <cite>query()</cite> should fail.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<p>targetname                      des
+1P/Halley                       1P
+3D/Biela                        3D
+9P/Tempel 1                     9P
+73P/Schwassmann Wachmann 3 C    73P         # Note the missing &#8220;C&#8221;!
+73P-C/Schwassmann Wachmann 3 C  73P-C
+73P-BB                          73P-BB
+322P                            322P
+X/1106 C1                       X/1106 C1
+P/1994 N2 (McNaught-Hartley)    P/1994 N2
+P/2001 YX127 (LINEAR)           P/2001 YX127
+C/-146 P1                       C/-146 P1  
+C/2001 A2-A (LINEAR)            C/2001 A2-A
+C/2013 US10                     C/2013 US10
+C/2015 V2 (Johnson)             C/2015 V2</p>
 </dd></dl>
 
 <dl class="attribute">

@@ -108,7 +108,7 @@
 
     <span class="c1">### constructor</span>
 
-<div class="viewcode-block" id="query.__init__"><a class="viewcode-back" href="../callhorizons.html#callhorizons.query.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">targetname</span><span class="p">,</span> <span class="n">smallbody</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="query.__init__"><a class="viewcode-back" href="../callhorizons.html#callhorizons.query.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">targetname</span><span class="p">,</span> <span class="n">smallbody</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cap</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize query to Horizons </span>
 
@@ -118,6 +118,8 @@
 <span class="sd">           HORIZONS-readable target number, name, or designation</span>
 <span class="sd">        smallbody          : boolean</span>
 <span class="sd">           use ``smallbody=False`` if targetname is a planet or spacecraft (optional, default: True)</span>
+<span class="sd">        cal                : boolean</span>
+<span class="sd">           set to `True` to return the current apparition for comet targets.</span>
 <span class="sd">        </span>
 
 <span class="sd">        Results</span>
@@ -128,6 +130,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">targetname</span>     <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">targetname</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">not_smallbody</span>  <span class="o">=</span> <span class="ow">not</span> <span class="n">smallbody</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cap</span>            <span class="o">=</span> <span class="n">cap</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">start_epoch</span>    <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stop_epoch</span>     <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">step_size</span>      <span class="o">=</span> <span class="kc">None</span>
@@ -137,10 +140,111 @@
         
         <span class="k">return</span> <span class="kc">None</span></div>
 
+    <span class="c1">### small body designation parsing</span>
+
+<div class="viewcode-block" id="query.parse_comet"><a class="viewcode-back" href="../callhorizons.html#callhorizons.query.parse_comet">[docs]</a>    <span class="k">def</span> <span class="nf">parse_comet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Parse `targetname` as if it were a comet.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        des : string or None</span>
+<span class="sd">          The designation of the comet or `None` if `targetname` does</span>
+<span class="sd">          not appear to be a comet name.  Note that comets starting</span>
+<span class="sd">          with &#39;X/&#39; are allowed, but this designation indicates a</span>
+<span class="sd">          comet without an orbit, so `query()` should fail.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        targetname                      des</span>
+<span class="sd">        1P/Halley                       1P</span>
+<span class="sd">        3D/Biela                        3D</span>
+<span class="sd">        9P/Tempel 1                     9P</span>
+<span class="sd">        73P/Schwassmann Wachmann 3 C    73P         # Note the missing &quot;C&quot;!</span>
+<span class="sd">        73P-C/Schwassmann Wachmann 3 C  73P-C</span>
+<span class="sd">        73P-BB                          73P-BB</span>
+<span class="sd">        322P                            322P</span>
+<span class="sd">        X/1106 C1                       X/1106 C1</span>
+<span class="sd">        P/1994 N2 (McNaught-Hartley)    P/1994 N2</span>
+<span class="sd">        P/2001 YX127 (LINEAR)           P/2001 YX127</span>
+<span class="sd">        C/-146 P1                       C/-146 P1  </span>
+<span class="sd">        C/2001 A2-A (LINEAR)            C/2001 A2-A</span>
+<span class="sd">        C/2013 US10                     C/2013 US10</span>
+<span class="sd">        C/2015 V2 (Johnson)             C/2015 V2</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="kn">import</span> <span class="nn">re</span>
+
+        <span class="n">pat</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;^(([1-9]</span><span class="si">{1}</span><span class="s1">[0-9]*[PD](-[A-Z]{1,2})?)&#39;</span>
+               <span class="s1">&#39;|([CPX]/-?[0-9]{1,4} [A-Z]{1,2}[1-9][0-9]{0,2}(-[A-Z]{1,2})?))&#39;</span><span class="p">)</span>
+
+        <span class="n">m</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">pat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetname</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="query.parse_asteroid"><a class="viewcode-back" href="../callhorizons.html#callhorizons.query.parse_asteroid">[docs]</a>    <span class="k">def</span> <span class="nf">parse_asteroid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Parse `targetname` as if it were a asteroid.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        des : string or None</span>
+<span class="sd">          The designation of the asteroid or `None` if `targetname` does</span>
+<span class="sd">          not appear to be an asteroid name.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        targetname        des</span>
+<span class="sd">        1                 1</span>
+<span class="sd">        (2) Pallas        2</span>
+<span class="sd">        (2001) Einstein   2001</span>
+<span class="sd">        2001 AT1          2001 AT1</span>
+<span class="sd">        (1714) Sy         1714</span>
+<span class="sd">        1714 SY           1714 SY    # Note the near-confusion with (1714)</span>
+<span class="sd">        2014 MU69         2014 MU69</span>
+<span class="sd">        2017 AA           2017 AA</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="kn">import</span> <span class="nn">re</span>
+
+        <span class="n">pat</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;^(([1-9][0-9]*( [A-Z]{1,2}([1-9][0-9]{0,2})?)?)&#39;</span>
+               <span class="s1">&#39;|(\(([1-9][0-9]*)\)))&#39;</span><span class="p">)</span>
+
+        <span class="n">m</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">pat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetname</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">5</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">5</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="query.isorbit_record"><a class="viewcode-back" href="../callhorizons.html#callhorizons.query.isorbit_record">[docs]</a>    <span class="k">def</span> <span class="nf">isorbit_record</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;`True` if `targetname` appears to be a comet orbit record number.</span>
+
+<span class="sd">        NAIF record numbers are 6 digits, begin with a &#39;9&#39; and can</span>
+<span class="sd">        change at any time.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="kn">import</span> <span class="nn">re</span>
+        <span class="n">test</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s1">&#39;^9[0-9]</span><span class="si">{5}</span><span class="s1">$&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetname</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">test</span></div>
+            
+<div class="viewcode-block" id="query.iscomet"><a class="viewcode-back" href="../callhorizons.html#callhorizons.query.iscomet">[docs]</a>    <span class="k">def</span> <span class="nf">iscomet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;`True` if `targetname` appears to be a comet.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_comet</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="query.isasteroid"><a class="viewcode-back" href="../callhorizons.html#callhorizons.query.isasteroid">[docs]</a>    <span class="k">def</span> <span class="nf">isasteroid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;`True` if `targetname` appears to be an asteroid.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_asteroid</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span></div>
 
     <span class="c1">### set epochs</span>
 
 <div class="viewcode-block" id="query.set_epochrange"><a class="viewcode-back" href="../callhorizons.html#callhorizons.query.set_epochrange">[docs]</a>    <span class="k">def</span> <span class="nf">set_epochrange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_epoch</span><span class="p">,</span> <span class="n">stop_epoch</span><span class="p">,</span> <span class="n">step_size</span><span class="p">):</span>
+
         <span class="sd">&quot;&quot;&quot;Set a range of epochs, all times are UT</span>
 
 <span class="sd">        Parameters</span>
@@ -412,15 +516,31 @@
               <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">solar_elongation</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;&#39;&quot;</span> \
               <span class="o">+</span> <span class="s2">&quot;&amp;CENTER=&#39;&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">observatory_code</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;&#39;&quot;</span>
 
-        <span class="c1"># check if self.targetname is a designation</span>
-        <span class="c1"># lower case + upper case + numbers = pot. case sensitive designation</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">not_smallbody</span><span class="p">:</span>
             <span class="n">url</span> <span class="o">+=</span> <span class="s2">&quot;&amp;COMMAND=&#39;&quot;</span> <span class="o">+</span> \
                    <span class="n">urllib</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targetname</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;&#39;&quot;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">isorbit_record</span><span class="p">():</span>
+            <span class="c1"># Comet orbit record. Do not use DES, CAP. This test must</span>
+            <span class="c1"># occur before asteroid test.</span>
+            <span class="n">url</span> <span class="o">+=</span> <span class="s2">&quot;&amp;COMMAND=&#39;&quot;</span> <span class="o">+</span> \
+                   <span class="n">urllib</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targetname</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;%3B&#39;&quot;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">iscomet</span><span class="p">():</span>
+            <span class="c1"># for comets, potentially append the current appararition</span>
+            <span class="c1"># (CAP) parameter</span>
+            <span class="n">des</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_comet</span><span class="p">()</span>
+            <span class="n">url</span> <span class="o">+=</span> <span class="s2">&quot;&amp;COMMAND=&#39;DES=&quot;</span> <span class="o">+</span> \
+                   <span class="n">urllib</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="n">des</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;%3B&quot;</span> <span class="o">+</span> \
+                   <span class="p">(</span><span class="s2">&quot;CAP&#39;&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cap</span> <span class="k">else</span> <span class="s2">&quot;&#39;&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">isasteroid</span><span class="p">():</span>
+            <span class="c1"># for asteroids, use &#39;DES=&quot;designation&quot;;&#39;</span>
+            <span class="n">des</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_asteroid</span><span class="p">()</span>
+            <span class="n">url</span> <span class="o">+=</span> <span class="s2">&quot;&amp;COMMAND=&#39;&quot;</span> <span class="o">+</span> \
+                   <span class="n">urllib</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="n">des</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;%3B&#39;&quot;</span>
         <span class="k">elif</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetname</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">isalpha</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span>
              <span class="bp">self</span><span class="o">.</span><span class="n">targetname</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span>
              <span class="bp">self</span><span class="o">.</span><span class="n">targetname</span><span class="o">.</span><span class="n">islower</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span>
              <span class="bp">self</span><span class="o">.</span><span class="n">targetname</span><span class="o">.</span><span class="n">isupper</span><span class="p">()):</span>
+            <span class="c1"># lower case + upper case + numbers = pot. case sensitive designation</span>
             <span class="n">url</span> <span class="o">+=</span> <span class="s2">&quot;&amp;COMMAND=&#39;DES=&quot;</span> <span class="o">+</span> \
                    <span class="n">urllib</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targetname</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;%3B&#39;&quot;</span> 
         <span class="k">else</span><span class="p">:</span>
@@ -465,7 +585,7 @@
             <span class="k">except</span> <span class="n">urllib</span><span class="o">.</span><span class="n">URLError</span><span class="p">:</span>
                 <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
                 <span class="c1"># in case the HORIZONS website is blocked (due to another query)</span>
-                <span class="c1"># wait 1 second and try again</span>
+                <span class="c1"># wait 0.1 second and try again</span>
             <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">50</span><span class="p">:</span>
                 <span class="k">return</span> <span class="mi">0</span> <span class="c1"># website could not be reached</span>
