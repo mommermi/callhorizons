@@ -2,3 +2,5 @@
 *pyc
 CALLHORIZONS.egg-info*
 dist*
+build*
+.cache*
