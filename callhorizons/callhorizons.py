@@ -465,7 +465,7 @@ class query():
         elif self.isasteroid():
             # for asteroids, use 'DES="designation";'
             des = self.parse_asteroid()
-            url += "&COMMAND='DES=" + \
+            url += "&COMMAND='" + \
                    urllib.quote(des.encode("utf8")) + "%3B'"
         elif (not self.targetname.replace(' ', '').isalpha() and not
              self.targetname.isdigit() and not
@@ -516,7 +516,7 @@ class query():
             except urllib.URLError:
                 time.sleep(0.1)
                 # in case the HORIZONS website is blocked (due to another query)
-                # wait 1 second and try again
+                # wait 0.1 second and try again
             i += 1
             if i > 50:
                 return 0 # website could not be reached

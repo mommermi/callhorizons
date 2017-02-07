@@ -64,6 +64,8 @@ michael.mommert (at) nau.edu
 Changelog
 ---------
 
+* 2017-02-07: better support for target name parsing (thanks to `mkelley`_!)
+
 * 2016-11-08: added ObsEclLon and ObsEclLat to get_ephemerides()
 
 * 2016-11-06: implemented tests and Python 3.5 support, v1.0.2
@@ -79,3 +81,4 @@ Changelog
 * 2016-02-27: changed structure into class structure, created pip installer, v1.0
 
 .. _documentation: http://mommermi.github.io/callhorizons/readme.html
+.. _mkelley: https://github.com/mkelley
