@@ -38,7 +38,7 @@ Examples
     eros = callhorizons.query('Eros')
     eros.set_discreteepochs([2457446.177083, 2457446.182343])
     eros.get_ephemerides(568)
-    print eros['RA'], eros['DEC']
+    print(eros['RA'], eros['DEC'])
 
 For more examples, see the `documentation`_.
     
