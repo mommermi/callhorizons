@@ -212,8 +212,8 @@ class query():
 
         Parameters
         ----------
-        discreteepochs    : list
-           list of floats or strings, maximum length: 15
+        discreteepochs    : array_like
+           list or 1D array of floats or strings, maximum length: 15
 
         Returns
         -------
@@ -227,7 +227,7 @@ class query():
         
         If more than 15 epochs are provided, the list will be cropped to 15 epochs.
         """
-        if type(discreteepochs) is not list:
+        if not isinstance(discreteepochs, (list, np.ndarray)):
             discreteepochs = [discreteepochs]
 
         self.discreteepochs = discreteepochs
