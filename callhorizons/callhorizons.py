@@ -924,6 +924,23 @@ class query():
         if self.not_smallbody:
             url += "&COMMAND='" + \
                    urllib.quote(self.targetname.encode("utf8")) + "'"
+        elif self.isorbit_record():
+            # Comet orbit record. Do not use DES, CAP. This test must
+            # occur before asteroid test.
+            url += "&COMMAND='" + \
+                   urllib.quote(self.targetname.encode("utf8")) + "%3B'"
+        elif self.iscomet():
+            # for comets, potentially append the current appararition
+            # (CAP) parameter
+            des = self.parse_comet()
+            url += "&COMMAND='DES=" + \
+                   urllib.quote(des.encode("utf8")) + "%3B" + \
+                   ("CAP'" if self.cap else "'")
+        elif self.isasteroid():
+            # for asteroids, use 'DES="designation";'
+            des = self.parse_asteroid()
+            url += "&COMMAND='" + \
+                   urllib.quote(des.encode("utf8")) + "%3B'"
         elif (not self.targetname.replace(' ', '').isalpha() and not
              self.targetname.isdigit() and not
              self.targetname.islower() and not
