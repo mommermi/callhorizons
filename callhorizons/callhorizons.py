@@ -479,9 +479,6 @@ class query():
                    urllib.quote(self.targetname.encode("utf8")) + "%3B'"
 
         if self.discreteepochs is not None:
-            if len(self.discreteepochs) > 15:
-                print ('CALLHORIZONS WARNING: more than 15 discrete epochs',
-                       'provided; output may be truncated.')
             url += "&TLIST="
             for date in self.discreteepochs:
                 url += "'" + str(date) + "'"
@@ -951,9 +948,6 @@ class query():
 
 
         if self.discreteepochs is not None:
-            if len(self.discreteepochs) > 15:
-                print ('CALLHORIZONS WARNING: more than 15 discrete epochs ',
-                       'provided; output may be truncated.')
             url += "&TLIST="
             for date in self.discreteepochs:
                 url += "'" + str(date) + "'"
