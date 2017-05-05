@@ -1,6 +1,5 @@
-
-
-<!doctype html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -9,7 +8,7 @@
     
     <title>callhorizons module &#8212; CALLHORIZONS 0.9 documentation</title>
     
-    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
@@ -18,20 +17,16 @@
         VERSION:     '0.9',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/bizstyle.js"></script>
-    <link rel="top" title="CALLHORIZONS 0.9 documentation" href="readme.html" />
-    <link rel="up" title="callhorizons" href="modules.html" />
-    <link rel="prev" title="callhorizons" href="modules.html" />
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <!--[if lt IE 9]>
-    <script type="text/javascript" src="_static/css3-mediaqueries.js"></script>
-    <![endif]-->
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="callhorizons" href="modules.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -49,31 +44,7 @@
         <li class="nav-item nav-item-0"><a href="readme.html">CALLHORIZONS 0.9 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="modules.html" accesskey="U">callhorizons</a> &#187;</li> 
       </ul>
-    </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="modules.html"
-                        title="previous chapter">callhorizons</a></p>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/callhorizons.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
-    <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
-        </div>
-      </div>
+    </div>  
 
     <div class="document">
       <div class="documentwrapper">
@@ -87,7 +58,7 @@ ephemerides and orbital elements.</p>
 <p>This module provides a convenient python interface to the JPL
 HORIZONS system by directly accessing and parsing the HORIZONS
 website. Ephemerides can be obtained through get_ephemerides,
-orbital elements through get_elements. Function 
+orbital elements through get_elements. Function
 export2pyephem provides an interface to the PyEphem module.</p>
 <p>michael.mommert (at) nau.edu, latest version: v1.0.1, 2016-07-19.
 This code is inspired by code created by Alex Hagen.</p>
@@ -99,7 +70,13 @@ v0.9:   first release</p>
 <dl class="class">
 <dt id="callhorizons.query">
 <em class="property">class </em><code class="descclassname">callhorizons.</code><code class="descname">query</code><span class="sig-paren">(</span><em>targetname</em>, <em>smallbody=True</em>, <em>cap=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/callhorizons.html#query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#callhorizons.query" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="attribute">
+<dt id="callhorizons.query.__dict__">
+<code class="descname">__dict__</code><em class="property"> = mappingproxy({'__module__': 'callhorizons', '__init__': &lt;function query.__init__&gt;, 'parse_comet': &lt;function query.parse_comet&gt;, 'parse_asteroid': &lt;function query.parse_asteroid&gt;, 'isorbit_record': &lt;function query.isorbit_record&gt;, 'iscomet': &lt;function query.iscomet&gt;, 'isasteroid': &lt;function query.isasteroid&gt;, 'set_epochrange': &lt;function query.set_epochrange&gt;, 'set_discreteepochs': &lt;function query.set_discreteepochs&gt;, 'fields': &lt;property object&gt;, '__len__': &lt;function query.__len__&gt;, 'dates': &lt;property object&gt;, 'query': &lt;property object&gt;, 'dates_jd': &lt;property object&gt;, '__repr__': &lt;function query.__repr__&gt;, '__str__': &lt;function query.__str__&gt;, '__getitem__': &lt;function query.__getitem__&gt;, 'get_ephemerides': &lt;function query.get_ephemerides&gt;, 'get_elements': &lt;function query.get_elements&gt;, 'export2pyephem': &lt;function query.export2pyephem&gt;, '__dict__': &lt;attribute '__dict__' of 'query' objects&gt;, '__weakref__': &lt;attribute '__weakref__' of 'query' objects&gt;, '__doc__': None})</em><a class="headerlink" href="#callhorizons.query.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="callhorizons.query.__getitem__">
 <code class="descname">__getitem__</code><span class="sig-paren">(</span><em>key</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/callhorizons.html#query.__getitem__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#callhorizons.query.__getitem__" title="Permalink to this definition">¶</a></dt>
 <dd><p>provides access to query data</p>
@@ -107,14 +84,10 @@ v0.9:   first release</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>key</strong> : str/int</p>
-<blockquote>
-<div><p>epoch index or property key</p>
-</div></blockquote>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>key</strong> &#8211; str/int;
+epoch index or property key</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">query data according to key</p>
-</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">query data according to key</td>
 </tr>
 </tbody>
 </table>
@@ -128,18 +101,14 @@ v0.9:   first release</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>targetname</strong> : str</p>
-<blockquote>
-<div><p>HORIZONS-readable target number, name, or designation</p>
-</div></blockquote>
-<p><strong>smallbody</strong> : boolean</p>
-<blockquote>
-<div><p>use <code class="docutils literal"><span class="pre">smallbody=False</span></code> if targetname is a planet or spacecraft (optional, default: True)</p>
-</div></blockquote>
-<p><strong>cal</strong> : boolean</p>
-<blockquote class="last">
-<div><p>set to <cite>True</cite> to return the current apparition for comet targets.</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>targetname</strong> &#8211; HORIZONS-readable target number, name, or designation</li>
+<li><strong>smallbody</strong> &#8211; boolean  use <code class="docutils literal"><span class="pre">smallbody=False</span></code> if targetname is a planet or spacecraft (optional, default: True)</li>
+<li><strong>cap</strong> &#8211; boolean set to <cite>True</cite> to return the current apparition for comet targets.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
 </td>
 </tr>
 </tbody>
@@ -170,6 +139,12 @@ v0.9:   first release</p>
 </dd></dl>
 
 <dl class="attribute">
+<dt id="callhorizons.query.__weakref__">
+<code class="descname">__weakref__</code><a class="headerlink" href="#callhorizons.query.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="attribute">
 <dt id="callhorizons.query.dates">
 <code class="descname">dates</code><a class="headerlink" href="#callhorizons.query.dates" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns list of epochs that have been queried (format &#8216;YYYY-MM-DD HH-MM-SS&#8217;)</p>
@@ -183,7 +158,7 @@ v0.9:   first release</p>
 
 <dl class="method">
 <dt id="callhorizons.query.export2pyephem">
-<code class="descname">export2pyephem</code><span class="sig-paren">(</span><em>center=u'500&#64;10'</em>, <em>equinox=2000.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/callhorizons.html#query.export2pyephem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#callhorizons.query.export2pyephem" title="Permalink to this definition">¶</a></dt>
+<code class="descname">export2pyephem</code><span class="sig-paren">(</span><em>center='500&#64;10'</em>, <em>equinox=2000.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/callhorizons.html#query.export2pyephem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#callhorizons.query.export2pyephem" title="Permalink to this definition">¶</a></dt>
 <dd><p>Call JPL HORIZONS website to obtain orbital elements based on the
 provided targetname, epochs, and center code and create a
 PyEphem (<a class="reference external" href="http://rhodesmill.org/pyephem/">http://rhodesmill.org/pyephem/</a>) object. This function
@@ -192,39 +167,40 @@ requires PyEphem to be installed.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>center</strong> : str</p>
-<blockquote>
-<div><p>center body (default: <a class="reference external" href="mailto:500&#37;&#52;&#48;10">500<span>&#64;</span>10</a> = Sun)</p>
-</div></blockquote>
-<p><strong>equinox</strong> : float</p>
-<blockquote class="last">
-<div><p>equinox (default: 2000.0)</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>center</strong> &#8211; str;
+center body (default: <a class="reference external" href="mailto:500&#37;&#52;&#48;10">500<span>&#64;</span>10</a> = Sun)</li>
+<li><strong>equinox</strong> &#8211; float;
+equinox (default: 2000.0)</li>
+</ul>
 </td>
 </tr>
-</tbody>
-</table>
-<p class="rubric">Examples</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">callhorizons</span>
+<tr class="field-even field"><th class="field-name">Result:</th><td class="field-body"><p class="first">list;
+list of PyEphem objects, one per epoch</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><div class="first last highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">callhorizons</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">ephem</span>
-</pre></div>
-</div>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ceres</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;Ceres&#39;</span><span class="p">)</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ceres</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;Ceres&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ceres</span><span class="o">.</span><span class="n">set_epochrange</span><span class="p">(</span><span class="s1">&#39;2016-02-23 00:00&#39;</span><span class="p">,</span> <span class="s1">&#39;2016-02-24 00:00&#39;</span><span class="p">,</span> <span class="s1">&#39;1h&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ceres_pyephem</span> <span class="o">=</span> <span class="n">ceres</span><span class="o">.</span><span class="n">export2pyephem</span><span class="p">()</span>
-</pre></div>
-</div>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">nau</span> <span class="o">=</span> <span class="n">ephem</span><span class="o">.</span><span class="n">Observer</span><span class="p">()</span> <span class="c1"># setup observer site</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nau</span> <span class="o">=</span> <span class="n">ephem</span><span class="o">.</span><span class="n">Observer</span><span class="p">()</span> <span class="c1"># setup observer site</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">nau</span><span class="o">.</span><span class="n">lon</span> <span class="o">=</span> <span class="o">-</span><span class="mf">111.653152</span><span class="o">/</span><span class="mf">180.</span><span class="o">*</span><span class="n">numpy</span><span class="o">.</span><span class="n">pi</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">nau</span><span class="o">.</span><span class="n">lat</span> <span class="o">=</span> <span class="mf">35.184108</span><span class="o">/</span><span class="mf">180.</span><span class="o">*</span><span class="n">numpy</span><span class="o">.</span><span class="n">pi</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">nau</span><span class="o">.</span><span class="n">elevation</span> <span class="o">=</span> <span class="mi">2100</span> <span class="c1"># m</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">nau</span><span class="o">.</span><span class="n">date</span> <span class="o">=</span> <span class="s1">&#39;2015/10/5 01:23&#39;</span> <span class="c1"># UT </span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nau</span><span class="o">.</span><span class="n">date</span> <span class="o">=</span> <span class="s1">&#39;2015/10/5 01:23&#39;</span> <span class="c1"># UT</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;next rising: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nau</span><span class="o">.</span><span class="n">next_rising</span><span class="p">(</span><span class="n">ceres_pyephem</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;next transit: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nau</span><span class="o">.</span><span class="n">next_transit</span><span class="p">(</span><span class="n">ceres_pyephem</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;next setting: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nau</span><span class="o">.</span><span class="n">next_setting</span><span class="p">(</span><span class="n">ceres_pyephem</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
 </pre></div>
 </div>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
@@ -235,7 +211,7 @@ requires PyEphem to be installed.</p>
 
 <dl class="method">
 <dt id="callhorizons.query.get_elements">
-<code class="descname">get_elements</code><span class="sig-paren">(</span><em>center=u'500&#64;10'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/callhorizons.html#query.get_elements"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#callhorizons.query.get_elements" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_elements</code><span class="sig-paren">(</span><em>center='500&#64;10'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/callhorizons.html#query.get_elements"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#callhorizons.query.get_elements" title="Permalink to this definition">¶</a></dt>
 <dd><p>Call JPL HORIZONS website to obtain orbital elements based on the
 provided targetname, epochs, and center code. For valid center
 codes, please refer to <a class="reference external" href="http://ssd.jpl.nasa.gov/horizons.cgi">http://ssd.jpl.nasa.gov/horizons.cgi</a></p>
@@ -243,20 +219,22 @@ codes, please refer to <a class="reference external" href="http://ssd.jpl.nasa.g
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>center</strong> :  str</p>
-<blockquote class="last">
-<div><p>center body (default: <a class="reference external" href="mailto:500&#37;&#52;&#48;10">500<span>&#64;</span>10</a> = Sun)</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>center</strong> &#8211; str; 
+center body (default: <a class="reference external" href="mailto:500&#37;&#52;&#48;10">500<span>&#64;</span>10</a> = Sun)</p>
 </td>
 </tr>
-</tbody>
-</table>
-<p class="rubric">Examples</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ceres</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;Ceres&#39;</span><span class="p">)</span>
+<tr class="field-even field"><th class="field-name">Result:</th><td class="field-body"><p class="first">int; number of epochs queried</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><div class="first last highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ceres</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;Ceres&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ceres</span><span class="o">.</span><span class="n">set_epochrange</span><span class="p">(</span><span class="s1">&#39;2016-02-23 00:00&#39;</span><span class="p">,</span> <span class="s1">&#39;2016-02-24 00:00&#39;</span><span class="p">,</span> <span class="s1">&#39;1h&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span> <span class="p">(</span><span class="n">ceres</span><span class="o">.</span><span class="n">get_elements</span><span class="p">(),</span> <span class="s1">&#39;epochs queried&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="docutils">
 <dt>The queried properties and their definitions are:</dt>
 <dd><table border="1" class="first last docutils">
@@ -332,32 +310,30 @@ of valid observatory codes, refer to
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>observatory_code</strong> : str/int</p>
-<blockquote>
-<div><p>observer&#8217;s location code according to Minor Planet Center</p>
-</div></blockquote>
-<p><strong>airmass_lessthan</strong> : float</p>
-<blockquote>
-<div><p>maximum airmass (optional, default: 99)</p>
-</div></blockquote>
-<p><strong>solar_elongation</strong> : tuple</p>
-<blockquote>
-<div><p>permissible solar elongation range (optional, deg)</p>
-</div></blockquote>
-<p><strong>skip_daylight</strong> : boolean</p>
-<blockquote class="last">
-<div><p>crop daylight epoch during query (optional)</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>observatory_code</strong> &#8211; str/int;
+observer&#8217;s location code according to Minor Planet Center</li>
+<li><strong>airmass_lessthan</strong> &#8211; float;
+maximum airmass (optional, default: 99)</li>
+<li><strong>solar_elongation</strong> &#8211; tuple;
+permissible solar elongation range (optional, deg)</li>
+<li><strong>skip_daylight</strong> &#8211; boolean;
+crop daylight epoch during query (optional)</li>
+</ul>
 </td>
 </tr>
-</tbody>
-</table>
-<p class="rubric">Examples</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ceres</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;Ceres&#39;</span><span class="p">)</span>
+<tr class="field-even field"><th class="field-name">Result:</th><td class="field-body"><p class="first">int; number of epochs queried</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><div class="first last highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ceres</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;Ceres&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ceres</span><span class="o">.</span><span class="n">set_epochrange</span><span class="p">(</span><span class="s1">&#39;2016-02-23 00:00&#39;</span><span class="p">,</span> <span class="s1">&#39;2016-02-24 00:00&#39;</span><span class="p">,</span> <span class="s1">&#39;1h&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span> <span class="p">(</span><span class="n">ceres</span><span class="o">.</span><span class="n">get_ephemerides</span><span class="p">(</span><span class="mi">568</span><span class="p">),</span> <span class="s1">&#39;epochs queried&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="docutils">
 <dt>The queried properties and their definitions are:</dt>
 <dd><table border="1" class="first last docutils">
@@ -510,25 +486,51 @@ change at any time.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>des</strong> : string or None</p>
-<blockquote class="last">
-<div><p>The designation of the asteroid or <cite>None</cite> if <cite>targetname</cite> does
-not appear to be an asteroid name.</p>
-</div></blockquote>
-</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">string or None;
+The designation of the asteroid or <cite>None</cite> if <cite>targetname</cite> does
+not appear to be an asteroid name.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Example:</th><td class="field-body">the following table shows the result of the parsing:</td>
 </tr>
 </tbody>
 </table>
-<p class="rubric">Examples</p>
-<p>targetname        des
-1                 1
-(2) Pallas        2
-(2001) Einstein   2001
-2001 AT1          2001 AT1
-(1714) Sy         1714
-1714 SY           1714 SY    # Note the near-confusion with (1714)
-2014 MU69         2014 MU69
-2017 AA           2017 AA</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">targetname</th>
+<th class="head">des</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>1</td>
+<td>1</td>
+</tr>
+<tr class="row-odd"><td>(2 Pallas)</td>
+<td>2</td>
+</tr>
+<tr class="row-even"><td>(2001) Einstein</td>
+<td>2001</td>
+</tr>
+<tr class="row-odd"><td>2001 AT1</td>
+<td>2001 AT1</td>
+</tr>
+<tr class="row-even"><td>(1714) Sy</td>
+<td>1714</td>
+</tr>
+<tr class="row-odd"><td>1714 SY</td>
+<td>1714 SY</td>
+</tr>
+<tr class="row-even"><td>2014 MU69</td>
+<td>2014 MU69</td>
+</tr>
+<tr class="row-odd"><td>2017 AA</td>
+<td>2017 AA</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -539,33 +541,71 @@ not appear to be an asteroid name.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>des</strong> : string or None</p>
-<blockquote class="last">
-<div><p>The designation of the comet or <cite>None</cite> if <cite>targetname</cite> does
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">string or None; 
+The designation of the comet or <cite>None</cite> if <cite>targetname</cite> does
 not appear to be a comet name.  Note that comets starting
 with &#8216;X/&#8217; are allowed, but this designation indicates a
-comet without an orbit, so <cite>query()</cite> should fail.</p>
-</div></blockquote>
-</td>
+comet without an orbit, so <cite>query()</cite> should fail.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Example:</th><td class="field-body">the following table shows the result of the parsing:</td>
 </tr>
 </tbody>
 </table>
-<p class="rubric">Examples</p>
-<p>targetname                      des
-1P/Halley                       1P
-3D/Biela                        3D
-9P/Tempel 1                     9P
-73P/Schwassmann Wachmann 3 C    73P         # Note the missing &#8220;C&#8221;!
-73P-C/Schwassmann Wachmann 3 C  73P-C
-73P-BB                          73P-BB
-322P                            322P
-X/1106 C1                       X/1106 C1
-P/1994 N2 (McNaught-Hartley)    P/1994 N2
-P/2001 YX127 (LINEAR)           P/2001 YX127
-C/-146 P1                       C/-146 P1  
-C/2001 A2-A (LINEAR)            C/2001 A2-A
-C/2013 US10                     C/2013 US10
-C/2015 V2 (Johnson)             C/2015 V2</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">targetname</th>
+<th class="head">des</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>1P/Halley</td>
+<td>1P</td>
+</tr>
+<tr class="row-odd"><td>3D/Biela</td>
+<td>3D</td>
+</tr>
+<tr class="row-even"><td>9P/Tempel 1</td>
+<td>9P</td>
+</tr>
+<tr class="row-odd"><td>73P/Schwassmann Wachmann 3 C</td>
+<td>73P (note the missing &#8220;C&#8221;)</td>
+</tr>
+<tr class="row-even"><td>73P-C/Schwassmann Wachmann 3 C</td>
+<td>73P-C</td>
+</tr>
+<tr class="row-odd"><td>73P-BB</td>
+<td>73P-BB</td>
+</tr>
+<tr class="row-even"><td>322P</td>
+<td>322P</td>
+</tr>
+<tr class="row-odd"><td>X/1106 C1</td>
+<td>X/1106 C1</td>
+</tr>
+<tr class="row-even"><td>P/1994 N2 (McNaught-Hartley)</td>
+<td>P/1994 N2</td>
+</tr>
+<tr class="row-odd"><td>P/2001 YX127 (LINEAR)</td>
+<td>P/2001 YX127</td>
+</tr>
+<tr class="row-even"><td>C/-146 P1</td>
+<td>C/-146 P1</td>
+</tr>
+<tr class="row-odd"><td>C/2001 A2-A (LINEAR)</td>
+<td>C/2001 A2-A</td>
+</tr>
+<tr class="row-even"><td>C/2013 US10</td>
+<td>C/2013 US10</td>
+</tr>
+<tr class="row-odd"><td>C/2015 V2 (Johnson)</td>
+<td>C/2015 V2</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
@@ -583,24 +623,22 @@ Dates</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>discreteepochs</strong> : list</p>
-<blockquote>
-<div><p>list of floats or strings, maximum length: 15</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>discreteepochs</strong> &#8211; array_like
+list or 1D array of floats or strings</p>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">None</p>
 </td>
 </tr>
-</tbody>
-</table>
-<p class="rubric">Examples</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">callhorizons</span>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><div class="first last highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">callhorizons</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ceres</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;Ceres&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ceres</span><span class="o">.</span><span class="n">set_discreteepochs</span><span class="p">([</span><span class="mf">2457446.177083</span><span class="p">,</span> <span class="mf">2457446.182343</span><span class="p">])</span>
 </pre></div>
 </div>
-<p>If more than 15 epochs are provided, the list will be cropped to 15 epochs.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -611,31 +649,28 @@ Dates</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>start_epoch</strong> :    str</p>
-<blockquote>
-<div><p>start epoch of the format &#8216;YYYY-MM-DD [HH-MM-SS]&#8217;</p>
-</div></blockquote>
-<p><strong>stop_epoch</strong> :    str</p>
-<blockquote>
-<div><p>final epoch of the format &#8216;YYYY-MM-DD [HH-MM-SS]&#8217;</p>
-</div></blockquote>
-<p><strong>step_size</strong> :    str</p>
-<blockquote>
-<div><p>epoch step size, e.g., &#8216;1d&#8217; for 1 day, &#8216;10m&#8217; for 10 minutes...</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>start_epoch</strong> &#8211; str;
+start epoch of the format &#8216;YYYY-MM-DD [HH-MM-SS]&#8217;</li>
+<li><strong>stop_epoch</strong> &#8211; str;
+final epoch of the format &#8216;YYYY-MM-DD [HH-MM-SS]&#8217;</li>
+<li><strong>step_size</strong> &#8211; str;
+epoch step size, e.g., &#8216;1d&#8217; for 1 day, &#8216;10m&#8217; for 10 minutes...</li>
+</ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">None</p>
 </td>
 </tr>
-</tbody>
-</table>
-<p class="rubric">Examples</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">callhorizons</span>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><div class="first last highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">callhorizons</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ceres</span> <span class="o">=</span> <span class="n">callhorizons</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;Ceres&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ceres</span><span class="o">.</span><span class="n">set_epochrange</span><span class="p">(</span><span class="s1">&#39;2016-02-26&#39;</span><span class="p">,</span> <span class="s1">&#39;2016-10-25&#39;</span><span class="p">,</span> <span class="s1">&#39;1d&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
+</td>
+</tr>
+</tbody>
+</table>
 <p>Note that dates are mandatory; if no time is given, midnight is assumed.</p>
 </dd></dl>
 
@@ -645,6 +680,30 @@ Dates</p>
 
 
           </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="modules.html"
+                        title="previous chapter">callhorizons</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/callhorizons.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -667,7 +726,7 @@ Dates</p>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2016, Michael Mommert.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.6.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.1.
     </div>
   </body>
 </html>

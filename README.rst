@@ -64,6 +64,8 @@ michael.mommert (at) nau.edu
 Changelog
 ---------
 
+* 2017-05-05: removed the 15-epoch limit for ephemerides and element queries (thatnks to `migueldvb`_!)
+
 * 2017-02-07: better support for target name parsing (thanks to `mkelley`_!)
 
 * 2016-11-08: added ObsEclLon and ObsEclLat to get_ephemerides()
@@ -82,3 +84,4 @@ Changelog
 
 .. _documentation: http://mommermi.github.io/callhorizons/readme.html
 .. _mkelley: https://github.com/mkelley
+.. _migueldvb: https://github.com/migueldvb

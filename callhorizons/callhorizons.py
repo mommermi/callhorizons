@@ -7,10 +7,11 @@ website. Ephemerides can be obtained through get_ephemerides,
 orbital elements through get_elements. Function
 export2pyephem provides an interface to the PyEphem module.
 
-michael.mommert (at) nau.edu, latest version: v1.0.1, 2016-07-19.
+michael.mommert (at) nau.edu, latest version: v1.0.5, 2017-05-05.
 This code is inspired by code created by Alex Hagen.
 
-
+v1.0.5: 15-epoch limit for set_discreteepochs removed
+v1.0.4: improved asteroid and comet name parsing
 v1.0.3: ObsEclLon and ObsEclLat added to get_ephemerides
 v1.0.2: Python 3.5 compatibility implemented
 v1.0.1: get_ephemerides fixed
@@ -43,20 +44,10 @@ class query():
         """
         Initialize query to Horizons
 
-        Parameters
-        ----------
-        targetname         : str
-           HORIZONS-readable target number, name, or designation
-        smallbody          : boolean
-           use ``smallbody=False`` if targetname is a planet or spacecraft (optional, default: True)
-        cap                : boolean
-           set to `True` to return the current apparition for comet targets.
-
-
-        Results
-        -------
-        None
-
+        :param targetname: HORIZONS-readable target number, name, or designation
+        :param smallbody:  boolean  use ``smallbody=False`` if targetname is a planet or spacecraft (optional, default: True)
+        :param cap: boolean set to `True` to return the current apparition for comet targets.
+        :return: None
         """
 
         self.targetname     = str(targetname)
@@ -76,32 +67,44 @@ class query():
     def parse_comet(self):
         """Parse `targetname` as if it were a comet.
 
-        Returns
-        -------
-        des : string or None
+        :return: string or None; 
           The designation of the comet or `None` if `targetname` does
           not appear to be a comet name.  Note that comets starting
           with 'X/' are allowed, but this designation indicates a
           comet without an orbit, so `query()` should fail.
-
-        Examples
-        --------
-        targetname                      des
-        1P/Halley                       1P
-        3D/Biela                        3D
-        9P/Tempel 1                     9P
-        73P/Schwassmann Wachmann 3 C    73P         # Note the missing "C"!
-        73P-C/Schwassmann Wachmann 3 C  73P-C
-        73P-BB                          73P-BB
-        322P                            322P
-        X/1106 C1                       X/1106 C1
-        P/1994 N2 (McNaught-Hartley)    P/1994 N2
-        P/2001 YX127 (LINEAR)           P/2001 YX127
-        C/-146 P1                       C/-146 P1
-        C/2001 A2-A (LINEAR)            C/2001 A2-A
-        C/2013 US10                     C/2013 US10
-        C/2015 V2 (Johnson)             C/2015 V2
-
+        :example: the following table shows the result of the parsing:
+     
+        +--------------------------------+--------------------------------+
+        |targetname                      |des                             |
+        +================================+================================+
+        |1P/Halley                       |1P                              |
+        +--------------------------------+--------------------------------+
+        |3D/Biela                        |3D                              |
+        +--------------------------------+--------------------------------+
+        |9P/Tempel 1                     |9P                              |
+        +--------------------------------+--------------------------------+
+        |73P/Schwassmann Wachmann 3 C    |73P (note the missing "C")      |
+        +--------------------------------+--------------------------------+
+        |73P-C/Schwassmann Wachmann 3 C  |73P-C                           |
+        +--------------------------------+--------------------------------+
+        |73P-BB                          |73P-BB                          |
+        +--------------------------------+--------------------------------+
+        |322P                            |322P                            |
+        +--------------------------------+--------------------------------+
+        |X/1106 C1                       |X/1106 C1                       |
+        +--------------------------------+--------------------------------+
+        |P/1994 N2 (McNaught-Hartley)    |P/1994 N2                       |
+        +--------------------------------+--------------------------------+
+        |P/2001 YX127 (LINEAR)           |P/2001 YX127                    |
+        +--------------------------------+--------------------------------+
+        |C/-146 P1                       |C/-146 P1                       |
+        +--------------------------------+--------------------------------+
+        |C/2001 A2-A (LINEAR)            |C/2001 A2-A                     |
+        +--------------------------------+--------------------------------+
+        |C/2013 US10                     |C/2013 US10                     |
+        +--------------------------------+--------------------------------+
+        |C/2015 V2 (Johnson)             |C/2015 V2                       |
+        +--------------------------------+--------------------------------+
         """
 
         import re
@@ -118,24 +121,30 @@ class query():
     def parse_asteroid(self):
         """Parse `targetname` as if it were a asteroid.
 
-        Returns
-        -------
-        des : string or None
+        :return: string or None;
           The designation of the asteroid or `None` if `targetname` does
           not appear to be an asteroid name.
+        :example: the following table shows the result of the parsing:
 
-        Examples
-        --------
-        targetname        des
-        1                 1
-        (2) Pallas        2
-        (2001) Einstein   2001
-        2001 AT1          2001 AT1
-        (1714) Sy         1714
-        1714 SY           1714 SY    # Note the near-confusion with (1714)
-        2014 MU69         2014 MU69
-        2017 AA           2017 AA
-
+        +--------------------------------+--------------------------------+
+        |targetname                      |des                             |
+        +================================+================================+
+        |1                               |1                               |
+        +--------------------------------+--------------------------------+
+        |\(2 Pallas\)                    |2                               |
+        +--------------------------------+--------------------------------+
+        |\(2001\) Einstein               |2001                            |
+        +--------------------------------+--------------------------------+
+        |2001 AT1                        |2001 AT1                        |
+        +--------------------------------+--------------------------------+
+        |\(1714\) Sy                     |1714                            |
+        +--------------------------------+--------------------------------+
+        |1714 SY                         |1714 SY                         |
+        +--------------------------------+--------------------------------+
+        |2014 MU69                       |2014 MU69                       |
+        +--------------------------------+--------------------------------+
+        |2017 AA                         |2017 AA                         |
+        +--------------------------------+--------------------------------+
         """
 
         import re
@@ -178,24 +187,16 @@ class query():
 
         """Set a range of epochs, all times are UT
 
-        Parameters
-        ----------
-        start_epoch        :    str
+        :param start_epoch: str;
            start epoch of the format 'YYYY-MM-DD [HH-MM-SS]'
-        stop_epoch         :    str
+        :param stop_epoch: str;
            final epoch of the format 'YYYY-MM-DD [HH-MM-SS]'
-        step_size          :    str
+        :param step_size: str;
            epoch step size, e.g., '1d' for 1 day, '10m' for 10 minutes...
-
-        Returns
-        -------
-        None
-
-        Examples
-        --------
-        >>> import callhorizons
-        >>> ceres = callhorizons.query('Ceres')
-        >>> ceres.set_epochrange('2016-02-26', '2016-10-25', '1d')
+        :return: None
+        :example: >>> import callhorizons
+                  >>> ceres = callhorizons.query('Ceres')
+                  >>> ceres.set_epochrange('2016-02-26', '2016-10-25', '1d')
 
         Note that dates are mandatory; if no time is given, midnight is assumed.
         """
@@ -210,27 +211,17 @@ class query():
         """Set a list of discrete epochs, epochs have to be given as Julian
         Dates
 
-        Parameters
-        ----------
-        discreteepochs    : array_like
-           list or 1D array of floats or strings, maximum length: 15
-
-        Returns
-        -------
-        None
-
-        Examples
-        --------
-        >>> import callhorizons
-        >>> ceres = callhorizons.query('Ceres')
-        >>> ceres.set_discreteepochs([2457446.177083, 2457446.182343])
-
-        If more than 15 epochs are provided, the list will be cropped to 15 epochs.
+        :param discreteepochs: array_like
+           list or 1D array of floats or strings
+        :return: None
+        :example: >>> import callhorizons
+                  >>> ceres = callhorizons.query('Ceres')
+                  >>> ceres.set_discreteepochs([2457446.177083, 2457446.182343])
         """
         if not isinstance(discreteepochs, (list, np.ndarray)):
             discreteepochs = [discreteepochs]
 
-        self.discreteepochs = discreteepochs
+        self.discreteepochs = list(discreteepochs)
 
 
     ### data access functions
@@ -299,15 +290,9 @@ class query():
     def __getitem__(self, key):
         """provides access to query data
 
-        Parameters
-        ----------
-        key          : str/int
+        :param key: str/int;
            epoch index or property key
-
-        Returns
-        -------
-        query data according to key
-
+        :return: query data according to key
         """
 
         # check if data exist
@@ -331,26 +316,18 @@ class query():
         of valid observatory codes, refer to
         http://minorplanetcenter.net/iau/lists/ObsCodesF.html
 
-        Parameters
-        ----------
-        observatory_code     : str/int
+        :param observatory_code: str/int;
            observer's location code according to Minor Planet Center
-        airmass_lessthan     : float
+        :param airmass_lessthan: float;
            maximum airmass (optional, default: 99)
-        solar_elongation     : tuple
+        :param solar_elongation: tuple;
            permissible solar elongation range (optional, deg)
-        skip_daylight        : boolean
+        :param skip_daylight: boolean;
            crop daylight epoch during query (optional)
-
-        Results
-        -------
-        number of epochs queried
-
-        Examples
-        --------
-        >>> ceres = callhorizons.query('Ceres')
-        >>> ceres.set_epochrange('2016-02-23 00:00', '2016-02-24 00:00', '1h')
-        >>> print (ceres.get_ephemerides(568), 'epochs queried')
+        :result: int; number of epochs queried
+        :example: >>> ceres = callhorizons.query('Ceres')
+                  >>> ceres.set_epochrange('2016-02-23 00:00', '2016-02-24 00:00', '1h')
+                  >>> print (ceres.get_ephemerides(568), 'epochs queried')
 
         The queried properties and their definitions are:
            +------------------+-----------------------------------------------+
@@ -426,7 +403,6 @@ class query():
            +------------------+-----------------------------------------------+
            | DEC_3sigma       | 3sigma pos. unc. in DEC (float, arcsec)       |
            +------------------+-----------------------------------------------+
-
         """
 
         # queried fields (see HORIZONS website for details)
@@ -854,20 +830,12 @@ class query():
         provided targetname, epochs, and center code. For valid center
         codes, please refer to http://ssd.jpl.nasa.gov/horizons.cgi
 
-        Parameters
-        ----------
-        center        :  str
+        :param center:  str; 
            center body (default: 500@10 = Sun)
-
-        Results
-        -------
-        number of epochs queried
-
-        Examples
-        --------
-        >>> ceres = callhorizons.query('Ceres')
-        >>> ceres.set_epochrange('2016-02-23 00:00', '2016-02-24 00:00', '1h')
-        >>> print (ceres.get_elements(), 'epochs queried')
+        :result: int; number of epochs queried
+        :example: >>> ceres = callhorizons.query('Ceres')
+                  >>> ceres.set_epochrange('2016-02-23 00:00', '2016-02-24 00:00', '1h')
+                  >>> print (ceres.get_elements(), 'epochs queried')
 
         The queried properties and their definitions are:
            +------------------+-----------------------------------------------+
@@ -903,7 +871,6 @@ class query():
            +------------------+-----------------------------------------------+
            | Q                | apoapsis distance (float, au)                 |
            +------------------+-----------------------------------------------+
-
         """
 
         # encode objectname for use in URL
@@ -1121,36 +1088,28 @@ class query():
         PyEphem (http://rhodesmill.org/pyephem/) object. This function
         requires PyEphem to be installed.
 
-        Parameters
-        ----------
-        center        : str
+        :param center: str;
            center body (default: 500@10 = Sun)
-        equinox       : float
+        :param equinox: float;
            equinox (default: 2000.0)
-
-        Results
-        -------
-        list of PyEphem objects, one per epoch
-
-        Examples
-        --------
-        >>> import callhorizons
-        >>> import numpy
-        >>> import ephem
-
-        >>> ceres = callhorizons.query('Ceres')
-        >>> ceres.set_epochrange('2016-02-23 00:00', '2016-02-24 00:00', '1h')
-        >>> ceres_pyephem = ceres.export2pyephem()
-
-        >>> nau = ephem.Observer() # setup observer site
-        >>> nau.lon = -111.653152/180.*numpy.pi
-        >>> nau.lat = 35.184108/180.*numpy.pi
-        >>> nau.elevation = 2100 # m
-        >>> nau.date = '2015/10/5 01:23' # UT
-        >>> print ('next rising: %s' % nau.next_rising(ceres_pyephem[0]))
-        >>> print ('next transit: %s' % nau.next_transit(ceres_pyephem[0]))
-        >>> print ('next setting: %s' % nau.next_setting(ceres_pyephem[0]))
-
+        :result: list;
+           list of PyEphem objects, one per epoch
+        :example: >>> import callhorizons
+                  >>> import numpy
+                  >>> import ephem
+                  >>>
+                  >>> ceres = callhorizons.query('Ceres')
+                  >>> ceres.set_epochrange('2016-02-23 00:00', '2016-02-24 00:00', '1h')
+                  >>> ceres_pyephem = ceres.export2pyephem()
+                  >>>
+                  >>> nau = ephem.Observer() # setup observer site
+                  >>> nau.lon = -111.653152/180.*numpy.pi
+                  >>> nau.lat = 35.184108/180.*numpy.pi
+                  >>> nau.elevation = 2100 # m
+                  >>> nau.date = '2015/10/5 01:23' # UT
+                  >>> print ('next rising: %s' % nau.next_rising(ceres_pyephem[0]))
+                  >>> print ('next transit: %s' % nau.next_transit(ceres_pyephem[0]))
+                  >>> print ('next setting: %s' % nau.next_setting(ceres_pyephem[0]))
         """
 
         try:

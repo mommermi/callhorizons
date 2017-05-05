@@ -4,3 +4,5 @@ CALLHORIZONS.egg-info*
 dist*
 build*
 .cache*
+doc/_static*
+doc/_build*
