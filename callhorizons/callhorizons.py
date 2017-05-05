@@ -545,8 +545,14 @@ class query():
                 src[idx].decode('UTF-8')):
                 HGline = src[idx+2].decode('UTF-8').split('=')
                 if 'B-V' in HGline[2]  and 'G' in HGline[1]:
-                    H = float(HGline[1].rstrip('G'))
-                    G = float(HGline[2].rstrip('B-V'))
+                    try:
+                        H = float(HGline[1].rstrip('G'))
+                    except ValueError:
+                        pass
+                    try:
+                        G = float(HGline[2].rstrip('B-V'))
+                    except ValueError:
+                        pass
             if ("Multiple major-bodies match string" in
                 src[idx].decode('UTF-8') or
                ("Matching small-bodies" in src[idx].decode('UTF-8') and not
@@ -988,8 +994,14 @@ class query():
             if "rotational period in hours)" in src[idx].decode('UTF-8'):
                 HGline = src[idx+2].decode('UTF-8').split('=')
                 if 'B-V' in HGline[2] and 'G' in HGline[1]:
-                    H = float(HGline[1].rstrip('G'))
-                    G = float(HGline[2].rstrip('B-V'))
+                    try:
+                        H = float(HGline[1].rstrip('G'))
+                    except ValueError:
+                        pass
+                    try:
+                        G = float(HGline[2].rstrip('B-V'))
+                    except ValueError:
+                        pass
             if ("Multiple major-bodies match string" in src[idx].decode('UTF-8') or
                ("Matching small-bodies" in src[idx].decode('UTF-8') and not
                 "No matches found" in src[idx+1].decode('UTF-8'))):
