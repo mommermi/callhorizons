@@ -82,6 +82,6 @@ Changelog
 
 * 2016-02-27: changed structure into class structure, created pip installer, v1.0
 
-.. _documentation: http://mommermi.github.io/callhorizons/readme.html
+.. _documentation: http://callhorizons.readthedocs.io/en/latest/
 .. _mkelley: https://github.com/mkelley
 .. _migueldvb: https://github.com/migueldvb

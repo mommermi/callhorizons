@@ -10,13 +10,13 @@ export2pyephem provides an interface to the PyEphem module.
 michael.mommert (at) nau.edu, latest version: v1.0.5, 2017-05-05.
 This code is inspired by code created by Alex Hagen.
 
-v1.0.5: 15-epoch limit for set_discreteepochs removed
-v1.0.4: improved asteroid and comet name parsing
-v1.0.3: ObsEclLon and ObsEclLat added to get_ephemerides
-v1.0.2: Python 3.5 compatibility implemented
-v1.0.1: get_ephemerides fixed
-v1.0:   bugfixes completed, planets/satellites accessible, too
-v0.9:   first release
+* v1.0.5: 15-epoch limit for set_discreteepochs removed
+* v1.0.4: improved asteroid and comet name parsing
+* v1.0.3: ObsEclLon and ObsEclLat added to get_ephemerides
+* v1.0.2: Python 3.5 compatibility implemented
+* v1.0.1: get_ephemerides fixed
+* v1.0:   bugfixes completed, planets/satellites accessible, too
+* v0.9:   first release
 
 
 """

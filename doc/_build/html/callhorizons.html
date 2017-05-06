@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>callhorizons module &#8212; CALLHORIZONS 0.9 documentation</title>
+    <title>callhorizons module &#8212; CALLHORIZONS 1.0.5 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.9',
+        VERSION:     '1.0.5',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -26,7 +26,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="callhorizons" href="modules.html" /> 
+    <link rel="prev" title="Examples" href="examples.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -39,10 +39,9 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="modules.html" title="callhorizons"
+          <a href="examples.html" title="Examples"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="readme.html">CALLHORIZONS 0.9 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="modules.html" accesskey="U">callhorizons</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">CALLHORIZONS 1.0.5 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -60,13 +59,17 @@ HORIZONS system by directly accessing and parsing the HORIZONS
 website. Ephemerides can be obtained through get_ephemerides,
 orbital elements through get_elements. Function
 export2pyephem provides an interface to the PyEphem module.</p>
-<p>michael.mommert (at) nau.edu, latest version: v1.0.1, 2016-07-19.
+<p>michael.mommert (at) nau.edu, latest version: v1.0.5, 2017-05-05.
 This code is inspired by code created by Alex Hagen.</p>
-<p>v1.0.3: ObsEclLon and ObsEclLat added to get_ephemerides
-v1.0.2: Python 3.5 compatibility implemented
-v1.0.1: get_ephemerides fixed
-v1.0:   bugfixes completed, planets/satellites accessible, too
-v0.9:   first release</p>
+<ul class="simple">
+<li>v1.0.5: 15-epoch limit for set_discreteepochs removed</li>
+<li>v1.0.4: improved asteroid and comet name parsing</li>
+<li>v1.0.3: ObsEclLon and ObsEclLat added to get_ephemerides</li>
+<li>v1.0.2: Python 3.5 compatibility implemented</li>
+<li>v1.0.1: get_ephemerides fixed</li>
+<li>v1.0:   bugfixes completed, planets/satellites accessible, too</li>
+<li>v0.9:   first release</li>
+</ul>
 <dl class="class">
 <dt id="callhorizons.query">
 <em class="property">class </em><code class="descclassname">callhorizons.</code><code class="descname">query</code><span class="sig-paren">(</span><em>targetname</em>, <em>smallbody=True</em>, <em>cap=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/callhorizons.html#query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#callhorizons.query" title="Permalink to this definition">¶</a></dt>
@@ -685,8 +688,8 @@ epoch step size, e.g., &#8216;1d&#8217; for 1 day, &#8216;10m&#8217; for 10 minu
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
-  <p class="topless"><a href="modules.html"
-                        title="previous chapter">callhorizons</a></p>
+  <p class="topless"><a href="examples.html"
+                        title="previous chapter">Examples</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -718,10 +721,9 @@ epoch step size, e.g., &#8216;1d&#8217; for 1 day, &#8216;10m&#8217; for 10 minu
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="modules.html" title="callhorizons"
+          <a href="examples.html" title="Examples"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="readme.html">CALLHORIZONS 0.9 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="modules.html" >callhorizons</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">CALLHORIZONS 1.0.5 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
