@@ -25,7 +25,7 @@ For other ways, see the `documentation`_.
 Documentation
 -------------
 
-The CALLHORIZONS documentation is available at http://mommermi.github.io/callhorizons/readme.html 
+The CALLHORIZONS documentation is available `here`_. 
 
 
 Examples
@@ -82,6 +82,7 @@ Changelog
 
 * 2016-02-27: changed structure into class structure, created pip installer, v1.0
 
+.. _here: http://callhorizons.readthedocs.io/en/latest/
 .. _documentation: http://callhorizons.readthedocs.io/en/latest/
 .. _mkelley: https://github.com/mkelley
 .. _migueldvb: https://github.com/migueldvb
