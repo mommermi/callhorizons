@@ -16,7 +16,7 @@ ephemerides and orbital elements of Solar System bodies.
    install
    use
    examples
-   callhorizons
+   modules
    
 
 Indices and tables
