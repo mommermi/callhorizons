@@ -738,7 +738,8 @@ class query():
                     fieldnames.append('alpha')
                     datatypes.append(np.float64)
                 elif (item.find('/r') > -1):
-                    this_eph.append({'/L':'leading', '/T':'trailing'}\
+                    this_eph.append({'/L':'leading', '/T':'trailing',
+                                     '/?':'not defined'}\
                                     [line[idx]])
                     fieldnames.append('elongFlag')
                     datatypes.append(object)
