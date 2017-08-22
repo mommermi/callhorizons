@@ -64,6 +64,8 @@ michael.mommert (at) nau.edu
 Changelog
 ---------
 
+* 2017-08-22: improved `parse_asteroid` function
+
 * 2017-07-05: fixed `KeyError` for solar elongation of the Sun (thanks to Pavel!)
 
 * 2017-05-05: removed the 15-epoch limit for ephemerides and element queries (thatnks to `migueldvb`_!)
