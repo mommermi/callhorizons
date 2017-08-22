@@ -25,7 +25,7 @@ For other ways, see the `documentation`_.
 Documentation
 -------------
 
-The CALLHORIZONS documentation is available at http://mommermi.github.io/callhorizons/readme.html 
+The CALLHORIZONS documentation is available `here`_. 
 
 
 Examples
@@ -64,6 +64,8 @@ michael.mommert (at) nau.edu
 Changelog
 ---------
 
+* 2017-07-05: fixed `KeyError` for solar elongation of the Sun (thanks to Pavel!)
+
 * 2017-05-05: removed the 15-epoch limit for ephemerides and element queries (thatnks to `migueldvb`_!)
 
 * 2017-02-07: better support for target name parsing (thanks to `mkelley`_!)
@@ -82,6 +84,7 @@ Changelog
 
 * 2016-02-27: changed structure into class structure, created pip installer, v1.0
 
-.. _documentation: http://mommermi.github.io/callhorizons/readme.html
+.. _here: http://callhorizons.readthedocs.io/en/latest/
+.. _documentation: http://callhorizons.readthedocs.io/en/latest/
 .. _mkelley: https://github.com/mkelley
 .. _migueldvb: https://github.com/migueldvb

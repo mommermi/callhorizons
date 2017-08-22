@@ -4,9 +4,9 @@ from setuptools import setup
 
 setup(
     name = "CALLHORIZONS",
-    version = "1.0.5",
+    version = "1.0.6",
     author = "Michael Mommert",
-    author_email = "michael.mommert (at) nau.edu",
+    author_email = "michael.mommert@nau.edu",
     description = "CALLHORIZONS is a Python interface to access JPL HORIZONS ephemerides and orbital elements of Solar System bodies.",
     license = "MIT",
     keywords = "solar system, ephemerides, ephemeris, orbital elements, pyephem, asteroids, planets, spacecraft",

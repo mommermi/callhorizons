@@ -6,7 +6,7 @@
 CALLHORIZONS Documentation
 ==========================
 
-CALLHORIZONS is a Python 2.7/3.5 interface to access `JPL HORIZONS`_
+CALLHORIZONS is a Python interface to access `JPL HORIZONS`_
 ephemerides and orbital elements of Solar System bodies.
 
 

@@ -110,7 +110,7 @@ How to Use It?
 
      dq.set_discreteepochs([2457446.177083, 2457446.182343])
 
-   where up to 15 discrete epochs are provided in the form of a list of
+   where discrete epochs are provided in the form of a list of
    Julian Dates.
 
 4. query ephemerides for the given times for a given observatory code
