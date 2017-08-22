@@ -23,7 +23,7 @@ v0.9:   first release
 
 from __future__ import (print_function, unicode_literals)
 
-
+import re
 import time
 import numpy as np
 try:
@@ -34,6 +34,14 @@ except ImportError:
     import urllib2 as urllib
 
 
+def _char2int(char):
+    """ translate characters to integer values (upper and lower case)"""
+    if char.isdigit():
+        return int(float(char))
+    if char.isupper():
+        return int(char, 36)
+    else:
+        return 26 + int(char, 36)
 
 
 class query():
@@ -121,46 +129,102 @@ class query():
     def parse_asteroid(self):
         """Parse `targetname` as if it were a asteroid.
 
-        :return: string or None;
-          The designation of the asteroid or `None` if `targetname` does
-          not appear to be an asteroid name.
+        :return: (string or None, int or None, string or None);
+          The designation, number, and name of the asteroid as derived from 
+          `self.targetname` are extracted into a tuple; each element that 
+          does not exist is set to `None`. Parenthesis in `self.targetname` 
+          will be ignored. Packed designations and numbers are unpacked. 
         :example: the following table shows the result of the parsing:
 
-        +--------------------------------+--------------------------------+
-        |targetname                      |des                             |
-        +================================+================================+
-        |1                               |1                               |
-        +--------------------------------+--------------------------------+
-        |\(2 Pallas\)                    |2                               |
-        +--------------------------------+--------------------------------+
-        |\(2001\) Einstein               |2001                            |
-        +--------------------------------+--------------------------------+
-        |2001 AT1                        |2001 AT1                        |
-        +--------------------------------+--------------------------------+
-        |\(1714\) Sy                     |1714                            |
-        +--------------------------------+--------------------------------+
-        |1714 SY                         |1714 SY                         |
-        +--------------------------------+--------------------------------+
-        |2014 MU69                       |2014 MU69                       |
-        +--------------------------------+--------------------------------+
-        |2017 AA                         |2017 AA                         |
-        +--------------------------------+--------------------------------+
+        +--------------------------------+---------------------------------+
+        |targetname                      |(desig, number, name)            |
+        +================================+=================================+
+        |1                               |(None, 1, None)                  |
+        +--------------------------------+---------------------------------+
+        |2 Pallas                        |(None, 2, Pallas)                |
+        +--------------------------------+---------------------------------+
+        |\(2001\) Einstein               |(None, 2001, Einstein)           |
+        +--------------------------------+---------------------------------+
+        |1714 Sy                         |(None, 1714, Sy)                 |
+        +--------------------------------+---------------------------------+
+        |2014 MU69                       |(2014 MU69, None, None)          |
+        +--------------------------------+---------------------------------+
+        |(228195) 6675 P-L               |(6675 P-L, 228195, None)         |
+        +--------------------------------+---------------------------------+
+        |4015 Wilson-Harrington (1979 VA)|(1979 VA, 4015, Wilson-Harrington|
+        +--------------------------------+---------------------------------+
+        |J95X00A                         |(1995 XA, None, None)            |
+        +--------------------------------+---------------------------------+
+        |K07Tf8A                         |(2007 TA418, None, None)         |
+        +--------------------------------+---------------------------------+
+        |G3693                           |(None, 163693, None)             |
+        +--------------------------------+---------------------------------+
         """
 
-        import re
-
-        pat = ('^(([1-9][0-9]*( [A-Z]{1,2}([1-9][0-9]{0,2})?)?)'
-               '|(\(([1-9][0-9]*)\)))')
+        pat = ('(([1-2][0-9]{0,3}[ _][A-Z][A-Z][0-9]{0,3})' # designation [0,1]
+               '|([1-9][0-9]{3} (P-L|T-[1-3])))' # Palomar-Leiden  [0,2]
+               '|([IJKL][0-9]{2}[A-Z][0-9a-z][0-9][A-Z])' # packed desig [4]
+               '|([A-Za-z][0-9]{4})' # packed number [5]
+               '|([A-Z][A-Z]*[a-z]*[ -]?[A-Z]?[a-z]*)' # name [6]
+               '|([1-9][0-9]*)') # number [7]
 
         m = re.findall(pat, self.targetname.strip())
-        if len(m) == 0:
-            return None
-        else:
-            if len(m[0][5]) > 0:
-                return m[0][5]
-            else:
-                return m[0][0]
 
+        desig = None
+        number = None
+        name = None
+
+        if len(m) > 0:
+            for el in m:
+                # designation
+                if len(el[0]) > 0:
+                    desig = el[0]
+                # packed designation (unpack here)
+                elif len(el[4]) > 0:
+                    ident = el[4]
+                # old designation style, e.g.: 1989AB
+                    if (len(ident.strip()) < 7 and ident[:4].isdigit() and
+                        ident[4:6].isalpha()):
+                        desig = ident[:4]+' '+ident[4:6]
+                        # Palomar Survey
+                    elif ident.find("PLS") == 0:
+                        desig = ident[3:] + " P-L"
+                        # Trojan Surveys
+                    elif ident.find("T1S") == 0:
+                        desig = ident[3:] + " T-1"   
+                    elif ident.find("T2S") == 0:
+                        desig = ident[3:] + " T-2"   
+                    elif ident.find("T3S") == 0:
+                        desig = ident[3:] + " T-3"   
+                    # insert blank in designations
+                    elif (ident[0:4].isdigit() and ident[4:6].isalpha() and
+                          ident[4] != ' '):
+                        desig = ident[:4]+" "+ident[4:]
+                    # MPC packed 7-digit designation
+                    elif (ident[0].isalpha() and ident[1:3].isdigit() and
+                          ident[-1].isalpha() and ident[-2].isdigit()):
+                        yr = str(_char2int(ident[0]))+ident[1:3]
+                        let = ident[3]+ident[-1]
+                        num = str(_char2int(ident[4]))+ident[5]
+                        num = num.lstrip("0")
+                        desig = yr+' '+let+num
+                    # nothing to do
+                    else:
+                        desig = ident
+                # packed number (unpack here)
+                elif len(el[5]) > 0:
+                    ident = el[5]
+                    number = ident = str(_char2int(ident[0]))+ ident[1:]
+                # number
+                elif len(el[7]) > 0:
+                    number = el[7]
+                    # name (strip here)
+                elif len(el[6]) > 0:
+                    name = el[6].strip()
+
+        return (desig, number, name)
+
+                    
     def isorbit_record(self):
         """`True` if `targetname` appears to be a comet orbit record number.
 
@@ -179,7 +243,7 @@ class query():
 
     def isasteroid(self):
         """`True` if `targetname` appears to be an asteroid."""
-        return self.parse_asteroid() is not None
+        return any(self.parse_asteroid()) is not None
 
     ### set epochs
 
@@ -440,7 +504,15 @@ class query():
                    ("CAP'" if self.cap else "'")
         elif self.isasteroid():
             # for asteroids, use 'DES="designation";'
-            des = self.parse_asteroid()
+            parsed = self.parse_asteroid()
+            if parsed[0] is not None:
+                des = self.parse_asteroid()[0]
+            elif parsed[1] is not None:
+                des = self.parse_asteroid()[1]
+            elif parsed[2] is not None:
+                des = self.parse_asteroid()[2]
+            else:
+                des = self.targetname
             url += "&COMMAND='" + \
                    urllib.quote(des.encode("utf8")) + "%3B'"
         elif (not self.targetname.replace(' ', '').isalpha() and not
@@ -908,7 +980,15 @@ class query():
                    ("CAP'" if self.cap else "'")
         elif self.isasteroid():
             # for asteroids, use 'DES="designation";'
-            des = self.parse_asteroid()
+            parsed = self.parse_asteroid()
+            if parsed[0] is not None:
+                des = self.parse_asteroid()[0]
+            elif parsed[1] is not None:
+                des = self.parse_asteroid()[1]
+            elif parsed[2] is not None:
+                des = self.parse_asteroid()[2]
+            else:
+                des = self.targetname
             url += "&COMMAND='" + \
                    urllib.quote(des.encode("utf8")) + "%3B'"
         elif (not self.targetname.replace(' ', '').isalpha() and not
