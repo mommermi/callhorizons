@@ -1,6 +1,6 @@
 """setup function for CALLHORIZONS module"""
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name = "CALLHORIZONS",
@@ -13,6 +13,7 @@ setup(
     url = "https://github.com/mommermi/callhorizons",
     packages=['callhorizons'],
     requires=['numpy'],
+    test_suite='tests', 
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Science/Research",

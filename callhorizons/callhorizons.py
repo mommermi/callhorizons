@@ -48,26 +48,35 @@ class query():
 
     ### constructor
 
-    def __init__(self, targetname, smallbody=True, cap=True):
+    def __init__(self, targetname, smallbody=True, cap=True, comet=False,
+                 asteroid=False):
         """
         Initialize query to Horizons
 
         :param targetname: HORIZONS-readable target number, name, or designation
-        :param smallbody:  boolean  use ``smallbody=False`` if targetname is a planet or spacecraft (optional, default: True)
-        :param cap: boolean set to `True` to return the current apparition for comet targets.
+        :param smallbody:  boolean  use ``smallbody=False`` if targetname is a 
+                           planet or spacecraft (optional, default: True)
+        :param cap: boolean set to `True` to return the current apparition for 
+                    comet targets
+        :param comet: set to `True` if this is a comet (will override 
+                      automatic targetname parsing)
+        :param asteroid: set to `True` if this is an asteroid (will override 
+                         automatic targetname parsing)
         :return: None
         """
 
         self.targetname     = str(targetname)
         self.not_smallbody  = not smallbody
         self.cap            = cap
+        self.comet = False # is this object a comet?
+        self.asteroid = False  # is this object an asteroid?
         self.start_epoch    = None
         self.stop_epoch     = None
         self.step_size      = None
         self.discreteepochs = None
         self.url            = None
         self.data           = None
-
+        
         return None
 
     ### small body designation parsing
@@ -75,56 +84,80 @@ class query():
     def parse_comet(self):
         """Parse `targetname` as if it were a comet.
 
-        :return: string or None; 
-          The designation of the comet or `None` if `targetname` does
-          not appear to be a comet name.  Note that comets starting
-          with 'X/' are allowed, but this designation indicates a
-          comet without an orbit, so `query()` should fail.
+        :return: (string or None, int or None, string or None);
+          The designation, number and prefix, and name of the comet as derived 
+          from `self.targetname` are extracted into a tuple; each element that 
+          does not exist is set to `None`. Parenthesis in `self.targetname` 
+          will be ignored.
         :example: the following table shows the result of the parsing:
      
         +--------------------------------+--------------------------------+
-        |targetname                      |des                             |
+        |targetname                      |(desig, prefixnumber, name)     |
         +================================+================================+
-        |1P/Halley                       |1P                              |
+        |1P/Halley                       |(None, '1P', 'Halley')          |
         +--------------------------------+--------------------------------+
-        |3D/Biela                        |3D                              |
+        |3D/Biela                        |(None, '3D', 'Biela')           |
         +--------------------------------+--------------------------------+
-        |9P/Tempel 1                     |9P                              |
+        |9P/Tempel 1                     |(None, '9P', 'Tempel 1')        |
         +--------------------------------+--------------------------------+
-        |73P/Schwassmann Wachmann 3 C    |73P (note the missing "C")      |
+        |73P/Schwassmann Wachmann 3 C    |(None, '73P',                   |
+        |                                |'Schwassmann Wachmann 3 C')     |
         +--------------------------------+--------------------------------+
-        |73P-C/Schwassmann Wachmann 3 C  |73P-C                           |
+        |73P-C/Schwassmann Wachmann 3 C  |(None, '73P-C',                 |
+        |                                |'Schwassmann Wachmann 3 C')     |
         +--------------------------------+--------------------------------+
-        |73P-BB                          |73P-BB                          |
+        |73P-BB                          |(None, '73P-BB', None)          |
         +--------------------------------+--------------------------------+
-        |322P                            |322P                            |
+        |322P                            |(None, '322P', None)            |
         +--------------------------------+--------------------------------+
-        |X/1106 C1                       |X/1106 C1                       |
+        |X/1106 C1                       |('1166 C1', 'X', None)          |
         +--------------------------------+--------------------------------+
-        |P/1994 N2 (McNaught-Hartley)    |P/1994 N2                       |
+        |P/1994 N2 (McNaught-Hartley)    |('1994 N2', 'P',                |
+        |                                |'McNaught-Hartley')             |
         +--------------------------------+--------------------------------+
-        |P/2001 YX127 (LINEAR)           |P/2001 YX127                    |
+        |P/2001 YX127 (LINEAR)           |('2001 YX127', 'P', 'LINEAR')   |
         +--------------------------------+--------------------------------+
-        |C/-146 P1                       |C/-146 P1                       |
+        |C/-146 P1                       |('-146 P1', 'C', None)          |
         +--------------------------------+--------------------------------+
-        |C/2001 A2-A (LINEAR)            |C/2001 A2-A                     |
+        |C/2001 A2-A (LINEAR)            |('2001 A2-A', 'C', 'LINEAR')    |
         +--------------------------------+--------------------------------+
-        |C/2013 US10                     |C/2013 US10                     |
+        |C/2013 US10                     |('2013 US10', 'C', None)        |
         +--------------------------------+--------------------------------+
-        |C/2015 V2 (Johnson)             |C/2015 V2                       |
+        |C/2015 V2 (Johnson)             |('2015 V2', 'C', 'Johnson')     |
         +--------------------------------+--------------------------------+
         """
 
         import re
 
-        pat = ('^(([1-9]{1}[0-9]*[PD](-[A-Z]{1,2})?)'
-               '|([CPX]/-?[0-9]{1,4} [A-Z]{1,2}[1-9][0-9]{0,2}(-[A-Z]{1,2})?))')
-
+        pat = ('^(([1-9]+[PDCXA](-[A-Z]{0,2})?)|[PDCX]/)' + # prefix [0,1,2]
+               '|([-]?[0-9]{3,4}[ _][A-Z]{1,2}[0-9]{1,3}(-[1-9A-Z]{0,2})?)' +
+               # designation [3,4]
+               ('|(([A-Z][a-z]?[A-Z]*[a-z]*[ -]?[A-Z]?[1-9]*[a-z]*)' +
+                '( [1-9A-Z]{1,2})*)') # name [5,6]
+               )
+        
         m = re.findall(pat, self.targetname.strip())
-        if len(m) == 0:
-            return None
-        else:
-            return m[0][0]
+
+        #print(m)
+        
+        prefixnumber = None
+        desig = None
+        name = None
+
+        if len(m) > 0:
+            for el in m:
+                # prefix/number
+                if len(el[0]) > 0:
+                    prefixnumber = el[0].replace('/', '')
+                # designation
+                if len(el[3]) > 0:
+                    desig = el[3].replace('_', ' ')
+                # name
+                if len(el[5]) > 0:
+                    if len(el[5]) > 1:
+                        name = el[5]
+
+        return (desig, prefixnumber, name)
 
     def parse_asteroid(self):
         """Parse `targetname` as if it were a asteroid.
@@ -214,13 +247,14 @@ class query():
                 # packed number (unpack here)
                 elif len(el[5]) > 0:
                     ident = el[5]
-                    number = ident = str(_char2int(ident[0]))+ ident[1:]
+                    number = ident = int(str(_char2int(ident[0]))+ident[1:])
                 # number
                 elif len(el[7]) > 0:
-                    number = el[7]
-                    # name (strip here)
+                    number = int(float(el[7]))
+                # name (strip here)
                 elif len(el[6]) > 0:
-                    name = el[6].strip()
+                    if len(el[6].strip()) > 1:
+                        name = el[6].strip()
 
         return (desig, number, name)
 
@@ -238,12 +272,21 @@ class query():
         return test
 
     def iscomet(self):
-        """`True` if `targetname` appears to be a comet."""
-        return self.parse_comet() is not None
+        """`True` if `targetname` appears to be a comet. """
+
+        # treat this object as comet if there is a prefix/number
+        if self.comet == True:
+            return true
+        else:
+            return (self.parse_comet()[0] is not None or
+                    self.parse_comet()[1] is not None)
 
     def isasteroid(self):
         """`True` if `targetname` appears to be an asteroid."""
-        return any(self.parse_asteroid()) is not None
+        if self.asteroid == True:
+            return True
+        else:
+            return any(self.parse_asteroid()) is not None
 
     ### set epochs
 
@@ -496,32 +539,32 @@ class query():
             url += "&COMMAND='" + \
                    urllib.quote(self.targetname.encode("utf8")) + "%3B'"
         elif self.iscomet():
-            # for comets, potentially append the current appararition
+            # for comets, potentially append the current apparition
             # (CAP) parameter
-            des = self.parse_comet()
+            for ident in self.parse_comet():
+                if ident is not None:
+                    break
+            if ident is None:
+                ident = self.targetname
             url += "&COMMAND='DES=" + \
-                   urllib.quote(des.encode("utf8")) + "%3B" + \
+                   urllib.quote(ident.encode("utf8")) + "%3B" + \
                    ("CAP'" if self.cap else "'")
         elif self.isasteroid():
             # for asteroids, use 'DES="designation";'
-            parsed = self.parse_asteroid()
-            if parsed[0] is not None:
-                des = self.parse_asteroid()[0]
-            elif parsed[1] is not None:
-                des = self.parse_asteroid()[1]
-            elif parsed[2] is not None:
-                des = self.parse_asteroid()[2]
-            else:
-                des = self.targetname
+            for ident in self.parse_asteroid():
+                if ident is not None:
+                    break
+            if ident is None:
+                ident = self.targetname
             url += "&COMMAND='" + \
-                   urllib.quote(des.encode("utf8")) + "%3B'"
-        elif (not self.targetname.replace(' ', '').isalpha() and not
-             self.targetname.isdigit() and not
-             self.targetname.islower() and not
-             self.targetname.isupper()):
-            # lower case + upper case + numbers = pot. case sensitive designation
-            url += "&COMMAND='DES=" + \
-                   urllib.quote(self.targetname.encode("utf8")) + "%3B'"
+                   urllib.quote(str(ident).encode("utf8")) + "%3B'"
+        # elif (not self.targetname.replace(' ', '').isalpha() and not
+        #      self.targetname.isdigit() and not
+        #      self.targetname.islower() and not
+        #      self.targetname.isupper()):
+        #     # lower case + upper case + numbers = pot. case sensitive designation
+        #     url += "&COMMAND='DES=" + \
+        #            urllib.quote(self.targetname.encode("utf8")) + "%3B'"
         else:
             url += "&COMMAND='" + \
                    urllib.quote(self.targetname.encode("utf8")) + "%3B'"
@@ -898,7 +941,7 @@ class query():
 
 
 
-    def get_elements(self, center='500@10'):
+    def get_elements(self, center='500@10', asteroid=False, comet=False):
         """Call JPL HORIZONS website to obtain orbital elements based on the
         provided targetname, epochs, and center code. For valid center
         codes, please refer to http://ssd.jpl.nasa.gov/horizons.cgi
@@ -973,30 +1016,30 @@ class query():
             url += "&COMMAND='" + \
                    urllib.quote(self.targetname.encode("utf8")) + "%3B'"
         elif self.iscomet():
-            # for comets, potentially append the current appararition
+            # for comets, potentially append the current apparition
             # (CAP) parameter
-            des = self.parse_comet()
+            for ident in self.parse_comet():
+                if ident is not None:
+                    break
+            if ident is None:
+                ident = self.targetname
             url += "&COMMAND='DES=" + \
-                   urllib.quote(des.encode("utf8")) + "%3B" + \
+                   urllib.quote(str(ident).encode("utf8")) + "%3B" + \
                    ("CAP'" if self.cap else "'")
         elif self.isasteroid():
             # for asteroids, use 'DES="designation";'
-            parsed = self.parse_asteroid()
-            if parsed[0] is not None:
-                des = self.parse_asteroid()[0]
-            elif parsed[1] is not None:
-                des = self.parse_asteroid()[1]
-            elif parsed[2] is not None:
-                des = self.parse_asteroid()[2]
-            else:
-                des = self.targetname
+            for ident in self.parse_asteroid():
+                if ident is not None:
+                    break
+            if ident is None:
+                ident = self.targetname
             url += "&COMMAND='" + \
-                   urllib.quote(des.encode("utf8")) + "%3B'"
-        elif (not self.targetname.replace(' ', '').isalpha() and not
-             self.targetname.isdigit() and not
-             self.targetname.islower() and not
-             self.targetname.isupper()):
-            url += "&COMMAND='DES=" + str(objectname) + "%3B'"
+                   urllib.quote(ident.encode("utf8")) + "%3B'"
+        # elif (not self.targetname.replace(' ', '').isalpha() and not
+        #      self.targetname.isdigit() and not
+        #      self.targetname.islower() and not
+        #      self.targetname.isupper()):
+        #     url += "&COMMAND='DES=" + str(objectname) + "%3B'"
         else:
             url += "&COMMAND='" + str(objectname) + "%3B'"
 
