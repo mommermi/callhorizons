@@ -68,8 +68,8 @@ class query():
         self.targetname     = str(targetname)
         self.not_smallbody  = not smallbody
         self.cap            = cap
-        self.comet = False # is this object a comet?
-        self.asteroid = False  # is this object an asteroid?
+        self.comet = comet # is this object a comet?
+        self.asteroid = asteroid  # is this object an asteroid?
         self.start_epoch    = None
         self.stop_epoch     = None
         self.step_size      = None
@@ -538,7 +538,7 @@ class query():
             # occur before asteroid test.
             url += "&COMMAND='" + \
                    urllib.quote(self.targetname.encode("utf8")) + "%3B'"
-        elif self.iscomet():
+        elif self.iscomet() and not self.asteroid:
             # for comets, potentially append the current apparition
             # (CAP) parameter
             for ident in self.parse_comet():
