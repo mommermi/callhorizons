@@ -55,7 +55,9 @@ class query():
 
         :param targetname: HORIZONS-readable target number, name, or designation
         :param smallbody:  boolean  use ``smallbody=False`` if targetname is a 
-                           planet or spacecraft (optional, default: True)
+                           planet or spacecraft (optional, default: `True`); 
+                           also use `True` if the targetname is exact and 
+                           should be queried as is
         :param cap: boolean set to `True` to return the current apparition for 
                     comet targets
         :param comet: set to `True` if this is a comet (will override 
