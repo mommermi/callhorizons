@@ -153,11 +153,13 @@ def test_designations():
         '1714 SY': ('1714 SY', None, None), # not real, just for testing
         '2014 MU69': ('2014 MU69', None, None),
         '(228195) 6675 P-L': ('6675 P-L', 228195, None),
+        '4101 T-3': ('4101 T-3', None, None),
         '4015 Wilson-Harrington (1979 VA)': ('1979 VA', 4015,
                                              'Wilson-Harrington'),
         'J95X00A': ('1995 XA', None, None),
         'K07Tf8A': ('2007 TA418', None, None),
-        'G3693': (None, 163693, None)
+        'G3693': (None, 163693, None),
+        '2017 U1': (None, None, None)
     }
 
     for comet, des in comets.items():

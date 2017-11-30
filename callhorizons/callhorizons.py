@@ -131,8 +131,8 @@ class query():
 
         import re
 
-        pat = ('^(([1-9]+[PDCXA](-[A-Z]{1,2})?)|[PDCX]/)' + # prefix [0,1,2]
-               '|([-]?[0-9]{3,4}[ _][A-Z][0-9]{1,3}(-[1-9A-Z]{0,2})?)' +
+        pat = ('^(([1-9]+[PDCXAI](-[A-Z]{1,2})?)|[PDCXAI]/)' + # prefix [0,1,2]
+               '|([-]?[0-9]{3,4}[ _][A-Z]{1,2}[0-9]{1,3}(-[1-9A-Z]{0,2})?)' +
                # designation [3,4]
                ('|(([A-Z][a-z]?[A-Z]*[a-z]*[ -]?[A-Z]?[1-9]*[a-z]*)' +
                 '( [1-9A-Z]{1,2})*)') # name [5,6]
@@ -163,7 +163,7 @@ class query():
 
     def parse_asteroid(self):
         """Parse `targetname` as if it were a asteroid.
-
+        
         :return: (string or None, int or None, string or None);
           The designation, number, and name of the asteroid as derived from 
           `self.targetname` are extracted into a tuple; each element that 
@@ -186,6 +186,8 @@ class query():
         +--------------------------------+---------------------------------+
         |(228195) 6675 P-L               |(6675 P-L, 228195, None)         |
         +--------------------------------+---------------------------------+
+        |4101 T-3                        |(4101 T-3, None, None)           |
+        +--------------------------------+---------------------------------+
         |4015 Wilson-Harrington (1979 VA)|(1979 VA, 4015, Wilson-Harrington|
         +--------------------------------+---------------------------------+
         |J95X00A                         |(1995 XA, None, None)            |
@@ -194,17 +196,39 @@ class query():
         +--------------------------------+---------------------------------+
         |G3693                           |(None, 163693, None)             |
         +--------------------------------+---------------------------------+
+        |2017 U1                         |(None, None, None)               |
+        +--------------------------------+---------------------------------+
         """
 
-        pat = ('(([1-2][0-9]{0,3}[ _][A-Z][A-Z][0-9]{0,3})' # designation [0,1]
-               '|([1-9][0-9]{3} (P-L|T-[1-3])))' # Palomar-Leiden  [0,2]
+        pat = ('(([1-2][0-9]{0,3}[ _][A-Z]{2}[0-9]{0,3})' # designation [0,1]
+               '|([1-9][0-9]{3}[ _](P-L|T-[1-3])))' # Palomar-Leiden  [0,2,3]
                '|([IJKL][0-9]{2}[A-Z][0-9a-z][0-9][A-Z])' # packed desig [4]
                '|([A-Za-z][0-9]{4})' # packed number [5]
-               '|([A-Z][A-Z]*[a-z]*[ -]?[A-Z]?[a-z]*)' # name [6]
-               '|([1-9][0-9]*)') # number [7]
+               '|([A-Z][A-Z]*[a-z][a-z]*[^0-9]*'
+                 '[ -]?[A-Z]?[a-z]*[^0-9]*)' # name [6]
+               '|([1-9][0-9]*(\b|$))') # number [7,8]
 
-        m = re.findall(pat, self.targetname.strip())
+        # regex patterns that will be ignored as they might cause
+        # confusion
+        non_pat = ('([1-2][0-9]{0,3}[ _][A-Z][0-9]*(\b|$))') # comet desig 
 
+        raw = self.targetname.translate(str.maketrans('()', '  ')).strip()
+
+        # reject non_pat patterns
+        non_m = re.findall(non_pat, raw)
+        #print('reject', raw, non_m)
+        if len(non_m) > 0:
+            for ps in non_m:
+                for p in ps:
+                    if p == '':
+                        continue
+                    raw = raw[:raw.find(p)] + raw[raw.find(p)+len(p):]
+
+        # match target patterns
+        m = re.findall(pat, raw)
+        
+        #print(raw, m)
+        
         desig = None
         number = None
         name = None
@@ -252,7 +276,8 @@ class query():
                     number = ident = int(str(_char2int(ident[0]))+ident[1:])
                 # number
                 elif len(el[7]) > 0:
-                    number = int(float(el[7]))
+                    number = int(float(el[7].translate(str.maketrans('()',
+                                                                     '  '))))
                 # name (strip here)
                 elif len(el[6]) > 0:
                     if len(el[6].strip()) > 1:
