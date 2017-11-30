@@ -302,15 +302,15 @@ class query():
         """`True` if `targetname` appears to be a comet. """
 
         # treat this object as comet if there is a prefix/number
-        if self.comet == True:
-            return true
+        if self.comet:
+            return True
         else:
             return (self.parse_comet()[0] is not None or
                     self.parse_comet()[1] is not None)
 
     def isasteroid(self):
         """`True` if `targetname` appears to be an asteroid."""
-        if self.asteroid == True:
+        if self.asteroid:
             return True
         else:
             return any(self.parse_asteroid()) is not None
@@ -565,6 +565,15 @@ class query():
             # occur before asteroid test.
             url += "&COMMAND='" + \
                    urllib.quote(self.targetname.encode("utf8")) + "%3B'"
+        elif self.isasteroid() and not self.comet:
+            # for asteroids, use 'DES="designation";'
+            for ident in self.parse_asteroid():
+                if ident is not None:
+                    break
+            if ident is None:
+                ident = self.targetname
+            url += "&COMMAND='" + \
+                   urllib.quote(str(ident).encode("utf8")) + "%3B'"
         elif self.iscomet() and not self.asteroid:
             # for comets, potentially append the current apparition
             # (CAP) parameter
@@ -576,15 +585,6 @@ class query():
             url += "&COMMAND='DES=" + \
                    urllib.quote(ident.encode("utf8")) + "%3B" + \
                    ("CAP'" if self.cap else "'")
-        elif self.isasteroid():
-            # for asteroids, use 'DES="designation";'
-            for ident in self.parse_asteroid():
-                if ident is not None:
-                    break
-            if ident is None:
-                ident = self.targetname
-            url += "&COMMAND='" + \
-                   urllib.quote(str(ident).encode("utf8")) + "%3B'"
         # elif (not self.targetname.replace(' ', '').isalpha() and not
         #      self.targetname.isdigit() and not
         #      self.targetname.islower() and not
@@ -1042,7 +1042,16 @@ class query():
             # occur before asteroid test.
             url += "&COMMAND='" + \
                    urllib.quote(self.targetname.encode("utf8")) + "%3B'"
-        elif self.iscomet():
+        elif self.isasteroid() and not self.comet:
+            # for asteroids, use 'DES="designation";'
+            for ident in self.parse_asteroid():
+                if ident is not None:
+                    break
+            if ident is None:
+                ident = self.targetname
+            url += "&COMMAND='" + \
+                   urllib.quote(str(ident).encode("utf8")) + "%3B'"
+        elif self.iscomet() and not self.asteroid:
             # for comets, potentially append the current apparition
             # (CAP) parameter
             for ident in self.parse_comet():
@@ -1051,17 +1060,8 @@ class query():
             if ident is None:
                 ident = self.targetname
             url += "&COMMAND='DES=" + \
-                   urllib.quote(str(ident).encode("utf8")) + "%3B" + \
+                   urllib.quote(ident.encode("utf8")) + "%3B" + \
                    ("CAP'" if self.cap else "'")
-        elif self.isasteroid():
-            # for asteroids, use 'DES="designation";'
-            for ident in self.parse_asteroid():
-                if ident is not None:
-                    break
-            if ident is None:
-                ident = self.targetname
-            url += "&COMMAND='" + \
-                   urllib.quote(ident.encode("utf8")) + "%3B'"
         # elif (not self.targetname.replace(' ', '').isalpha() and not
         #      self.targetname.isdigit() and not
         #      self.targetname.islower() and not
