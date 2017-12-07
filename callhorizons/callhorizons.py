@@ -24,6 +24,7 @@ This code is inspired by code created by Alex Hagen.
 from __future__ import (print_function, unicode_literals)
 
 import re
+import sys
 import time
 import numpy as np
 try:
@@ -212,7 +213,12 @@ class query():
         # confusion
         non_pat = ('([1-2][0-9]{0,3}[ _][A-Z][0-9]*(\b|$))') # comet desig 
 
-        raw = self.targetname.translate(str.maketrans('()', '  ')).strip()
+        if sys.version_info > (3, 0):
+            raw = self.targetname.translate(str.maketrans('()', '  ')).strip()
+        else:
+            import string
+            raw = self.targetname.translate(string.maketrans('()',
+                                                             '  ')).strip()
 
         # reject non_pat patterns
         non_m = re.findall(non_pat, raw)
@@ -276,8 +282,14 @@ class query():
                     number = ident = int(str(_char2int(ident[0]))+ident[1:])
                 # number
                 elif len(el[7]) > 0:
-                    number = int(float(el[7].translate(str.maketrans('()',
+                    if sys.version_info > (3, 0):
+                        number = int(float(el[7].translate(str.maketrans('()',
                                                                      '  '))))
+                    else:
+                        import string
+                        number = int(float(el[7].translate(string.maketrans('()',
+                                                                     '  '))))
+                    
                 # name (strip here)
                 elif len(el[6]) > 0:
                     if len(el[6].strip()) > 1:
