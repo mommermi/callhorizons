@@ -49,8 +49,8 @@ class query():
 
     ### constructor
 
-    def __init__(self, targetname, smallbody=True, cap=True, comet=False,
-                 asteroid=False):
+    def __init__(self, targetname, smallbody=True, cap=True, comet=None,
+                 asteroid=None):
         """
         Initialize query to Horizons
 
@@ -71,14 +71,16 @@ class query():
         self.targetname     = str(targetname)
         self.not_smallbody  = not smallbody
         self.cap            = cap
-        self.comet = comet # is this object a comet?
-        self.asteroid = asteroid  # is this object an asteroid?
+        self.comet          = comet # is this object a comet?
+        self.asteroid       = asteroid  # is this object an asteroid?
         self.start_epoch    = None
         self.stop_epoch     = None
         self.step_size      = None
         self.discreteepochs = None
         self.url            = None
         self.data           = None
+
+        assert not (self.comet and self.asteroid), 'Only one of comet or asteroid can be `True`.'
         
         return None
 
@@ -314,16 +316,20 @@ class query():
         """`True` if `targetname` appears to be a comet. """
 
         # treat this object as comet if there is a prefix/number
-        if self.comet:
-            return True
+        if self.comet is not None:
+            return self.comet
+        elif self.asteroid is not None:
+            return not self.asteroid
         else:
             return (self.parse_comet()[0] is not None or
                     self.parse_comet()[1] is not None)
 
     def isasteroid(self):
         """`True` if `targetname` appears to be an asteroid."""
-        if self.asteroid:
-            return True
+        if self.asteroid is not None:
+            return self.asteroid
+        elif self.comet is not None:
+            return not self.comet
         else:
             return any(self.parse_asteroid()) is not None
 
