@@ -48,29 +48,31 @@ def _char2int(char):
 class query():
 
     ### constructor
-
-    def __init__(self, targetname, smallbody=True, cap=True, comet=None,
-                 asteroid=None):
-        """
-        Initialize query to Horizons
+    def __init__(self, targetname, smallbody=True, cap=True, nofrag=False,
+                 comet=False, asteroid=False):
+        """Initialize query to Horizons
 
         :param targetname: HORIZONS-readable target number, name, or designation
         :param smallbody:  boolean  use ``smallbody=False`` if targetname is a 
                            planet or spacecraft (optional, default: `True`); 
                            also use `True` if the targetname is exact and 
                            should be queried as is
-        :param cap: boolean set to `True` to return the current apparition for 
+        :param cap: set to `True` to return the current apparition for
                     comet targets
+        :param nofrag: set to `True` to disable HORIZONS's comet
+                       fragment search
         :param comet: set to `True` if this is a comet (will override 
                       automatic targetname parsing)
         :param asteroid: set to `True` if this is an asteroid (will override 
                          automatic targetname parsing)
         :return: None
+
         """
 
         self.targetname     = str(targetname)
         self.not_smallbody  = not smallbody
         self.cap            = cap
+        self.nofrag         = nofrag
         self.comet          = comet # is this object a comet?
         self.asteroid       = asteroid  # is this object an asteroid?
         self.start_epoch    = None
@@ -130,12 +132,14 @@ class query():
         +--------------------------------+--------------------------------+
         |C/2015 V2 (Johnson)             |('2015 V2', 'C', 'Johnson')     |
         +--------------------------------+--------------------------------+
+        |C/2016 KA (Catalina)            |('2016 KA', 'C', 'Catalina')    |
+        +--------------------------------+--------------------------------+
         """
 
         import re
 
         pat = ('^(([1-9]+[PDCXAI](-[A-Z]{1,2})?)|[PDCXAI]/)' + # prefix [0,1,2]
-               '|([-]?[0-9]{3,4}[ _][A-Z]{1,2}[0-9]{1,3}(-[1-9A-Z]{0,2})?)' +
+               '|([-]?[0-9]{3,4}[ _][A-Z]{1,2}([0-9]{1,3})?(-[1-9A-Z]{0,2})?)' +
                # designation [3,4]
                ('|(([A-Z][a-z]?[A-Z]*[a-z]*[ -]?[A-Z]?[1-9]*[a-z]*)' +
                 '( [1-9A-Z]{1,2})*)') # name [5,6]
@@ -594,7 +598,7 @@ class query():
                    urllib.quote(str(ident).encode("utf8")) + "%3B'"
         elif self.iscomet() and not self.asteroid:
             # for comets, potentially append the current apparition
-            # (CAP) parameter
+            # (CAP) parameter, or the fragmentation flag (NOFRAG)
             for ident in self.parse_comet():
                 if ident is not None:
                     break
@@ -602,6 +606,7 @@ class query():
                 ident = self.targetname
             url += "&COMMAND='DES=" + \
                    urllib.quote(ident.encode("utf8")) + "%3B" + \
+                   ("NOFRAG%3B" if self.nofrag else "") + \
                    ("CAP'" if self.cap else "'")
         # elif (not self.targetname.replace(' ', '').isalpha() and not
         #      self.targetname.isdigit() and not
@@ -1071,7 +1076,7 @@ class query():
                    urllib.quote(str(ident).encode("utf8")) + "%3B'"
         elif self.iscomet() and not self.asteroid:
             # for comets, potentially append the current apparition
-            # (CAP) parameter
+            # (CAP) parameter, or the fragmentation flag (NOFRAG)
             for ident in self.parse_comet():
                 if ident is not None:
                     break
@@ -1079,6 +1084,7 @@ class query():
                 ident = self.targetname
             url += "&COMMAND='DES=" + \
                    urllib.quote(ident.encode("utf8")) + "%3B" + \
+                   ("NOFRAG%3B" if self.nofrag else "") + \
                    ("CAP'" if self.cap else "'")
         # elif (not self.targetname.replace(' ', '').isalpha() and not
         #      self.targetname.isdigit() and not
