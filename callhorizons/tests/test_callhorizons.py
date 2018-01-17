@@ -141,7 +141,8 @@ def test_designations():
         'C/-146 P1': ('-146 P1', 'C', None),
         'C/2001 A2-A (LINEAR)': ('2001 A2-A', 'C', 'LINEAR'),
         'C/2013 US10': ('2013 US10', 'C', None),
-        'C/2015 V2 (Johnson)': ('2015 V2', 'C', 'Johnson')
+        'C/2015 V2 (Johnson)': ('2015 V2', 'C', 'Johnson'),
+        'C/2016 KA (Catalina)': ('2016 KA', 'C', 'Catalina')
     }
 
     asteroids = {
