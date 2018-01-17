@@ -48,7 +48,6 @@ def _char2int(char):
 class query():
 
     ### constructor
-
     def __init__(self, targetname, smallbody=True, cap=True, nofrag=False,
                  comet=False, asteroid=False):
         """Initialize query to Horizons
@@ -82,6 +81,8 @@ class query():
         self.discreteepochs = None
         self.url            = None
         self.data           = None
+
+        assert not (self.comet and self.asteroid), 'Only one of comet or asteroid can be `True`.'
         
         return None
 
@@ -319,16 +320,20 @@ class query():
         """`True` if `targetname` appears to be a comet. """
 
         # treat this object as comet if there is a prefix/number
-        if self.comet:
-            return True
+        if self.comet is not None:
+            return self.comet
+        elif self.asteroid is not None:
+            return not self.asteroid
         else:
             return (self.parse_comet()[0] is not None or
                     self.parse_comet()[1] is not None)
 
     def isasteroid(self):
         """`True` if `targetname` appears to be an asteroid."""
-        if self.asteroid:
-            return True
+        if self.asteroid is not None:
+            return self.asteroid
+        elif self.comet is not None:
+            return not self.comet
         else:
             return any(self.parse_asteroid()) is not None
 
