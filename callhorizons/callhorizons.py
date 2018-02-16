@@ -572,7 +572,7 @@ class query():
         if self.not_smallbody:
             url += "&COMMAND='" + \
                    urllib.quote(self.targetname.encode("utf8")) + "'"
-        elif self.cap:
+        elif self.cap and self.comet:
             for ident in self.parse_comet():
                 if ident is not None:
                     break
