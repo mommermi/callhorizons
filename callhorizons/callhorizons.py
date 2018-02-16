@@ -572,6 +572,15 @@ class query():
         if self.not_smallbody:
             url += "&COMMAND='" + \
                    urllib.quote(self.targetname.encode("utf8")) + "'"
+        elif self.cap:
+            for ident in self.parse_comet():
+                if ident is not None:
+                    break
+            if ident is None:
+                ident = self.targetname
+            url += "&COMMAND='DES=" + \
+                   urllib.quote(ident.encode("utf8")) + "%3B" + \
+                   ("CAP'" if self.cap else "'")
         elif self.isorbit_record():
             # Comet orbit record. Do not use DES, CAP. This test must
             # occur before asteroid test.
