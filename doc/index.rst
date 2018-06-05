@@ -6,15 +6,15 @@
 CALLHORIZONS Documentation
 ==========================
 
+CALLHORIZONS is a Python interface to access `JPL HORIZONS`_
+ephemerides and orbital elements of Solar System bodies.
+
 **Please note that CALLHORIZONS is not maintained anymore.**
 Please use
 `astroquery.jplhorizons
 <http://astroquery.readthedocs.io/en/latest/jplhorizons/jplhorizons.html>`_
 instead, which will be maintained in the future and offers additional
 functionality. I apologize for any inconvenience.
-
-CALLHORIZONS is a Python interface to access `JPL HORIZONS`_
-ephemerides and orbital elements of Solar System bodies.
 
 
 .. toctree::
