@@ -3,6 +3,14 @@
 Examples
 --------
 
+.. role:: red
+
+:red:`Please note that CALLHORIZONS is not maintained anymore. Please use`
+`astroquery.jplhorizons
+<http://astroquery.readthedocs.io/en/latest/jplhorizons/jplhorizons.html>`_
+:red:`instead, which will be maintained in the future and offers additional
+functionality. I apologize for any inconvenience.`
+
 1. Find the hours on the night of 2015-10-25 (UT) when Centaur
    Echeclus is observable with airmass < 1.5 from Mauna Kea
    (observatory code: 568) during dark time::

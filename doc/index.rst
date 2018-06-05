@@ -6,13 +6,13 @@
 CALLHORIZONS Documentation
 ==========================
 
-.. class:: bold
+.. role:: red
 
-Please note that CALLHORIZONS is not maintained anymore. Please use
+:red:`Please note that CALLHORIZONS is not maintained anymore. Please use`
 `astroquery.jplhorizons
 <http://astroquery.readthedocs.io/en/latest/jplhorizons/jplhorizons.html>`_
-instead, which will be maintained in the future and offers additional
-functionality. I apologize for any inconvenience.
+:red:`instead, which will be maintained in the future and offers additional
+functionality. I apologize for any inconvenience.`
 
 
 CALLHORIZONS is a Python interface to access `JPL HORIZONS`_
