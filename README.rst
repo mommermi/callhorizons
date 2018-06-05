@@ -12,6 +12,13 @@ interface to the PyEphem module that allows for ephemerides
 calculations on your machine.
 
 
+Please note that CALLHORIZONS is not maintained anymore. Please use
+`astroquery.jplhorizons
+<http://astroquery.readthedocs.io/en/latest/jplhorizons/jplhorizons.html>`_
+instead, which will be maintained in the future and offers additional
+functionality. I apologize for any inconvenience.
+
+
 Installation
 ------------
 
@@ -20,6 +27,7 @@ The easiest way is to install the module using pip::
   pip install callhorizons
 
 For other ways, see the `documentation`_.
+
 
 
 Documentation

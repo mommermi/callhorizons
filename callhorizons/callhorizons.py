@@ -10,6 +10,7 @@ export2pyephem provides an interface to the PyEphem module.
 michael.mommert (at) nau.edu, latest version: v1.0.5, 2017-05-05.
 This code is inspired by code created by Alex Hagen.
 
+* v1.
 * v1.0.5: 15-epoch limit for set_discreteepochs removed
 * v1.0.4: improved asteroid and comet name parsing
 * v1.0.3: ObsEclLon and ObsEclLat added to get_ephemerides
@@ -27,12 +28,19 @@ import re
 import sys
 import time
 import numpy as np
+import warnings
 try:
     # Python 3
     import urllib.request as urllib
 except ImportError:
     # Python 2
     import urllib2 as urllib
+
+warnings.filterwarnings('once', category=DeprecationWarning)
+warnings.warn(('CALLHORIZONS is not maintained anymore; please use '
+               'astroquery.jplhorizons instead (https://github.com/'
+               'astropy/astroquery)'),
+              DeprecationWarning)
 
 
 def _char2int(char):
@@ -47,57 +55,58 @@ def _char2int(char):
 
 class query():
 
-    ### constructor
+    # constructor
     def __init__(self, targetname, smallbody=True, cap=True, nofrag=False,
                  comet=False, asteroid=False):
         """Initialize query to Horizons
 
         :param targetname: HORIZONS-readable target number, name, or designation
-        :param smallbody:  boolean  use ``smallbody=False`` if targetname is a 
-                           planet or spacecraft (optional, default: `True`); 
-                           also use `True` if the targetname is exact and 
+        :param smallbody:  boolean  use ``smallbody=False`` if targetname is a
+                           planet or spacecraft (optional, default: `True`);
+                           also use `True` if the targetname is exact and
                            should be queried as is
         :param cap: set to `True` to return the current apparition for
                     comet targets
         :param nofrag: set to `True` to disable HORIZONS's comet
                        fragment search
-        :param comet: set to `True` if this is a comet (will override 
+        :param comet: set to `True` if this is a comet (will override
                       automatic targetname parsing)
-        :param asteroid: set to `True` if this is an asteroid (will override 
+        :param asteroid: set to `True` if this is an asteroid (will override
                          automatic targetname parsing)
         :return: None
 
         """
 
-        self.targetname     = str(targetname)
-        self.not_smallbody  = not smallbody
-        self.cap            = cap
-        self.nofrag         = nofrag
-        self.comet          = comet # is this object a comet?
-        self.asteroid       = asteroid  # is this object an asteroid?
-        self.start_epoch    = None
-        self.stop_epoch     = None
-        self.step_size      = None
+        self.targetname = str(targetname)
+        self.not_smallbody = not smallbody
+        self.cap = cap
+        self.nofrag = nofrag
+        self.comet = comet  # is this object a comet?
+        self.asteroid = asteroid  # is this object an asteroid?
+        self.start_epoch = None
+        self.stop_epoch = None
+        self.step_size = None
         self.discreteepochs = None
-        self.url            = None
-        self.data           = None
+        self.url = None
+        self.data = None
 
-        assert not (self.comet and self.asteroid), 'Only one of comet or asteroid can be `True`.'
-        
+        assert not (
+            self.comet and self.asteroid), 'Only one of comet or asteroid can be `True`.'
+
         return None
 
-    ### small body designation parsing
+    # small body designation parsing
 
     def parse_comet(self):
         """Parse `targetname` as if it were a comet.
 
         :return: (string or None, int or None, string or None);
-          The designation, number and prefix, and name of the comet as derived 
-          from `self.targetname` are extracted into a tuple; each element that 
-          does not exist is set to `None`. Parenthesis in `self.targetname` 
+          The designation, number and prefix, and name of the comet as derived
+          from `self.targetname` are extracted into a tuple; each element that
+          does not exist is set to `None`. Parenthesis in `self.targetname`
           will be ignored.
         :example: the following table shows the result of the parsing:
-     
+
         +--------------------------------+--------------------------------+
         |targetname                      |(desig, prefixnumber, name)     |
         +================================+================================+
@@ -138,17 +147,17 @@ class query():
 
         import re
 
-        pat = ('^(([1-9]+[PDCXAI](-[A-Z]{1,2})?)|[PDCXAI]/)' + # prefix [0,1,2]
+        pat = ('^(([1-9]+[PDCXAI](-[A-Z]{1,2})?)|[PDCXAI]/)' +  # prefix [0,1,2]
                '|([-]?[0-9]{3,4}[ _][A-Z]{1,2}([0-9]{1,3})?(-[1-9A-Z]{0,2})?)' +
                # designation [3,4]
                ('|(([A-Z][a-z]?[A-Z]*[a-z]*[ -]?[A-Z]?[1-9]*[a-z]*)' +
-                '( [1-9A-Z]{1,2})*)') # name [5,6]
+                '( [1-9A-Z]{1,2})*)')  # name [5,6]
                )
-        
+
         m = re.findall(pat, self.targetname.strip())
 
-        #print(m)
-        
+        # print(m)
+
         prefixnumber = None
         desig = None
         name = None
@@ -170,12 +179,12 @@ class query():
 
     def parse_asteroid(self):
         """Parse `targetname` as if it were a asteroid.
-        
+
         :return: (string or None, int or None, string or None);
-          The designation, number, and name of the asteroid as derived from 
-          `self.targetname` are extracted into a tuple; each element that 
-          does not exist is set to `None`. Parenthesis in `self.targetname` 
-          will be ignored. Packed designations and numbers are unpacked. 
+          The designation, number, and name of the asteroid as derived from
+          `self.targetname` are extracted into a tuple; each element that
+          does not exist is set to `None`. Parenthesis in `self.targetname`
+          will be ignored. Packed designations and numbers are unpacked.
         :example: the following table shows the result of the parsing:
 
         +--------------------------------+---------------------------------+
@@ -207,17 +216,17 @@ class query():
         +--------------------------------+---------------------------------+
         """
 
-        pat = ('(([1-2][0-9]{0,3}[ _][A-Z]{2}[0-9]{0,3})' # designation [0,1]
-               '|([1-9][0-9]{3}[ _](P-L|T-[1-3])))' # Palomar-Leiden  [0,2,3]
-               '|([IJKL][0-9]{2}[A-Z][0-9a-z][0-9][A-Z])' # packed desig [4]
-               '|([A-Za-z][0-9]{4})' # packed number [5]
+        pat = ('(([1-2][0-9]{0,3}[ _][A-Z]{2}[0-9]{0,3})'  # designation [0,1]
+               '|([1-9][0-9]{3}[ _](P-L|T-[1-3])))'  # Palomar-Leiden  [0,2,3]
+               '|([IJKL][0-9]{2}[A-Z][0-9a-z][0-9][A-Z])'  # packed desig [4]
+               '|([A-Za-z][0-9]{4})'  # packed number [5]
                '|([A-Z][A-Z]*[a-z][a-z]*[^0-9]*'
-                 '[ -]?[A-Z]?[a-z]*[^0-9]*)' # name [6]
-               '|([1-9][0-9]*(\b|$))') # number [7,8]
+               '[ -]?[A-Z]?[a-z]*[^0-9]*)'  # name [6]
+               '|([1-9][0-9]*(\b|$))')  # number [7,8]
 
         # regex patterns that will be ignored as they might cause
         # confusion
-        non_pat = ('([1-2][0-9]{0,3}[ _][A-Z][0-9]*(\b|$))') # comet desig 
+        non_pat = ('([1-2][0-9]{0,3}[ _][A-Z][0-9]*(\b|$))')  # comet desig
 
         if sys.version_info > (3, 0):
             raw = self.targetname.translate(str.maketrans('()', '  ')).strip()
@@ -228,7 +237,7 @@ class query():
 
         # reject non_pat patterns
         non_m = re.findall(non_pat, raw)
-        #print('reject', raw, non_m)
+        # print('reject', raw, non_m)
         if len(non_m) > 0:
             for ps in non_m:
                 for p in ps:
@@ -238,9 +247,9 @@ class query():
 
         # match target patterns
         m = re.findall(pat, raw)
-        
-        #print(raw, m)
-        
+
+        # print(raw, m)
+
         desig = None
         number = None
         name = None
@@ -255,18 +264,18 @@ class query():
                     ident = el[4]
                 # old designation style, e.g.: 1989AB
                     if (len(ident.strip()) < 7 and ident[:4].isdigit() and
-                        ident[4:6].isalpha()):
+                            ident[4:6].isalpha()):
                         desig = ident[:4]+' '+ident[4:6]
                         # Palomar Survey
                     elif ident.find("PLS") == 0:
                         desig = ident[3:] + " P-L"
                         # Trojan Surveys
                     elif ident.find("T1S") == 0:
-                        desig = ident[3:] + " T-1"   
+                        desig = ident[3:] + " T-1"
                     elif ident.find("T2S") == 0:
-                        desig = ident[3:] + " T-2"   
+                        desig = ident[3:] + " T-2"
                     elif ident.find("T3S") == 0:
-                        desig = ident[3:] + " T-3"   
+                        desig = ident[3:] + " T-3"
                     # insert blank in designations
                     elif (ident[0:4].isdigit() and ident[4:6].isalpha() and
                           ident[4] != ' '):
@@ -290,12 +299,12 @@ class query():
                 elif len(el[7]) > 0:
                     if sys.version_info > (3, 0):
                         number = int(float(el[7].translate(str.maketrans('()',
-                                                                     '  '))))
+                                                                         '  '))))
                     else:
                         import string
                         number = int(float(el[7].translate(string.maketrans('()',
-                                                                     '  '))))
-                    
+                                                                            '  '))))
+
                 # name (strip here)
                 elif len(el[6]) > 0:
                     if len(el[6].strip()) > 1:
@@ -303,7 +312,6 @@ class query():
 
         return (desig, number, name)
 
-                    
     def isorbit_record(self):
         """`True` if `targetname` appears to be a comet orbit record number.
 
@@ -337,10 +345,9 @@ class query():
         else:
             return any(self.parse_asteroid()) is not None
 
-    ### set epochs
+    # set epochs
 
     def set_epochrange(self, start_epoch, stop_epoch, step_size):
-
         """Set a range of epochs, all times are UT
 
         :param start_epoch: str;
@@ -357,11 +364,10 @@ class query():
         Note that dates are mandatory; if no time is given, midnight is assumed.
         """
         self.start_epoch = start_epoch
-        self.stop_epoch  = stop_epoch
-        self.step_size   = step_size
+        self.stop_epoch = stop_epoch
+        self.step_size = step_size
 
         return None
-
 
     def set_discreteepochs(self, discreteepochs):
         """Set a list of discrete epochs, epochs have to be given as Julian
@@ -379,8 +385,7 @@ class query():
 
         self.discreteepochs = list(discreteepochs)
 
-
-    ### data access functions
+    # data access functions
 
     @property
     def fields(self):
@@ -414,8 +419,6 @@ class query():
         except:
             return []
 
-
-
     @property
     def dates_jd(self):
         """returns list of epochs that have been queried (Julian Dates)"""
@@ -435,13 +438,12 @@ class query():
             output += "discrete epochs: %s\n" % \
                       " ".join([str(epoch) for epoch in self.discreteepochs])
         if (self.start_epoch is not None and self.stop_epoch is not None and
-            self.step_size is not None):
+                self.step_size is not None):
             output += "epoch range from %s to %s in steps of %s\n" % \
                       (self.start_epoch, self.stop_epoch, self.step_size)
         output += "%d data sets queried with %d different fields" % \
                   (len(self), len(self.fields))
         return output
-
 
     def __getitem__(self, key):
         """provides access to query data
@@ -453,19 +455,17 @@ class query():
 
         # check if data exist
         if self.data is None or len(self.data) == 0:
-            print ('CALLHORIZONS ERROR: run get_ephemerides or get_elements',
-                   'first')
+            print('CALLHORIZONS ERROR: run get_ephemerides or get_elements',
+                  'first')
             return None
 
         return self.data[key]
 
-
-
-    ### call functions
+    # call functions
 
     def get_ephemerides(self, observatory_code,
                         airmass_lessthan=99,
-                        solar_elongation=(0,180),
+                        solar_elongation=(0, 180),
                         skip_daylight=False):
         """Call JPL HORIZONS website to obtain ephemerides based on the
         provided targetname, epochs, and observatory_code. For a list
@@ -568,10 +568,10 @@ class query():
         # encode objectname for use in URL
         objectname = urllib.quote(self.targetname.encode("utf8"))
 
-        ### construct URL for HORIZONS query
+        # construct URL for HORIZONS query
         url = "http://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=l" \
-              + "&TABLE_TYPE='OBSERVER'" \
-              + "&QUANTITIES='" + str(quantities) + "'" \
+            + "&TABLE_TYPE='OBSERVER'" \
+            + "&QUANTITIES='" + str(quantities) + "'" \
               + "&CSV_FORMAT='YES'" \
               + "&ANG_FORMAT='DEG'" \
               + "&CAL_FORMAT='BOTH'" \
@@ -634,11 +634,11 @@ class query():
                 url += "'" + str(date) + "'"
         elif (self.start_epoch is not None and self.stop_epoch is not None and
               self.step_size is not None):
-            url +=  "&START_TIME='" \
-                    + urllib.quote(self.start_epoch.encode("utf8")) + "'" \
-                    + "&STOP_TIME='" \
-                    + urllib.quote(self.stop_epoch.encode("utf8")) + "'" \
-                    + "&STEP_SIZE='" + str(self.step_size) + "'"
+            url += "&START_TIME='" \
+                + urllib.quote(self.start_epoch.encode("utf8")) + "'" \
+                + "&STOP_TIME='" \
+                + urllib.quote(self.stop_epoch.encode("utf8")) + "'" \
+                + "&STEP_SIZE='" + str(self.step_size) + "'"
         else:
             raise IOError('no epoch information given')
 
@@ -652,9 +652,9 @@ class query():
 
         self.url = url
 
-        #print (url)
+        # print (url)
 
-        ### call HORIZONS
+        # call HORIZONS
         i = 0  # count number of connection tries
         while True:
             try:
@@ -666,16 +666,16 @@ class query():
                 # wait 0.1 second and try again
             i += 1
             if i > 50:
-                return 0 # website could not be reached
+                return 0  # website could not be reached
 
-        ### disseminate website source code
+        # disseminate website source code
         # identify header line and extract data block (ephemerides data)
         # also extract targetname, absolute mag. (H), and slope parameter (G)
         headerline = []
         datablock = []
         in_datablock = False
         H, G = np.nan, np.nan
-        for idx,line in enumerate(src):
+        for idx, line in enumerate(src):
             line = line.decode('UTF-8')
 
             if "Date__(UT)__HR:MN" in line:
@@ -689,9 +689,9 @@ class query():
             if "Target body name" in line:
                 targetname = line[18:50].strip()
             if ("rotational period in hours)" in
-                src[idx].decode('UTF-8')):
+                    src[idx].decode('UTF-8')):
                 HGline = src[idx+2].decode('UTF-8').split('=')
-                if 'B-V' in HGline[2]  and 'G' in HGline[1]:
+                if 'B-V' in HGline[2] and 'G' in HGline[1]:
                     try:
                         H = float(HGline[1].rstrip('G'))
                     except ValueError:
@@ -702,17 +702,15 @@ class query():
                         pass
             if ("Multiple major-bodies match string" in
                 src[idx].decode('UTF-8') or
-               ("Matching small-bodies" in src[idx].decode('UTF-8') and not
-                "No matches found" in src[idx+1].decode('UTF-8'))):
+                ("Matching small-bodies" in src[idx].decode('UTF-8') and not
+                    "No matches found" in src[idx+1].decode('UTF-8'))):
                 raise ValueError('Ambiguous target name; check URL: %s' %
                                  url)
             if ("Matching small-bodies" in src[idx].decode('UTF-8') and
-                "No matches found" in src[idx+1].decode('UTF-8')):
+                    "No matches found" in src[idx+1].decode('UTF-8')):
                 raise ValueError('Unknown target; check URL: %s' % url)
 
-
-
-        ### field identification for each line
+        # field identification for each line
         ephemerides = []
         for line in datablock:
             line = line.split(',')
@@ -721,12 +719,12 @@ class query():
             if len(line) < len(quantities.split(',')):
                 continue
 
-            this_eph   = []
+            this_eph = []
             fieldnames = []
-            datatypes   = []
+            datatypes = []
 
             # create a dictionary for each date (each line)
-            for idx,item in enumerate(headerline):
+            for idx, item in enumerate(headerline):
 
                 if ('Date__(UT)__HR:MN' in item):
                     this_eph.append(line[idx].strip())
@@ -738,19 +736,19 @@ class query():
                     datatypes.append(np.float64)
                     # read out and convert solar presence
                     try:
-                        this_eph.append({'*':'daylight', 'C':'civil twilight',
-                                         'N':'nautical twilight',
-                                         'A':'astronomical twilight',
-                                         ' ':'dark',
-                                         't':'transiting'}[line[idx+1]])
+                        this_eph.append({'*': 'daylight', 'C': 'civil twilight',
+                                         'N': 'nautical twilight',
+                                         'A': 'astronomical twilight',
+                                         ' ': 'dark',
+                                         't': 'transiting'}[line[idx+1]])
                     except KeyError:
                         this_eph.append('n.a.')
                     fieldnames.append('solar_presence')
                     datatypes.append(object)
                     # read out and convert lunar presence
                     try:
-                        this_eph.append({'m':'moonlight',
-                                         ' ':'dark'}[line[idx+2]])
+                        this_eph.append({'m': 'moonlight',
+                                         ' ': 'dark'}[line[idx+2]])
                     except KeyError:
                         this_eph.append('n.a.')
                     fieldnames.append('lunar_presence')
@@ -778,28 +776,28 @@ class query():
                     fieldnames.append('DEC_rate')
                     datatypes.append(np.float64)
                 if (item.find('Azi_(a-app)') > -1):
-                    try: # if AZ not given, e.g. for space telescopes
+                    try:  # if AZ not given, e.g. for space telescopes
                         this_eph.append(np.float64(line[idx]))
                         fieldnames.append('AZ')
                         datatypes.append(np.float64)
                     except ValueError:
                         pass
                 if (item.find('Elev_(a-app)') > -1):
-                    try: # if EL not given, e.g. for space telescopes
+                    try:  # if EL not given, e.g. for space telescopes
                         this_eph.append(np.float64(line[idx]))
                         fieldnames.append('EL')
                         datatypes.append(np.float64)
                     except ValueError:
                         pass
                 if (item.find('a-mass') > -1):
-                    try: # if airmass not given, e.g. for space telescopes
+                    try:  # if airmass not given, e.g. for space telescopes
                         this_eph.append(np.float64(line[idx]))
                     except ValueError:
                         this_eph.append(np.nan)
                     fieldnames.append('airmass')
                     datatypes.append(np.float64)
                 if (item.find('mag_ex') > -1):
-                    try: # if mag_ex not given, e.g. for space telescopes
+                    try:  # if mag_ex not given, e.g. for space telescopes
                         this_eph.append(np.float64(line[idx]))
                     except ValueError:
                         this_eph.append(np.nan)
@@ -878,7 +876,7 @@ class query():
                     datatypes.append(np.float64)
                 if (item.find('1-way_LT') > -1):
                     try:
-                        this_eph.append(np.float64(line[idx])*60.) # seconds
+                        this_eph.append(np.float64(line[idx])*60.)  # seconds
                     except ValueError:
                         this_eph.append(np.nan)
                     fieldnames.append('lighttime')
@@ -894,7 +892,7 @@ class query():
                 # ground-based telescopes have both parameters in separate
                 # columns
                 if (item.find('/r    S-T-O') > -1):
-                    this_eph.append({'/L':'leading', '/T':'trailing'}\
+                    this_eph.append({'/L': 'leading', '/T': 'trailing'}
                                     [line[idx].split()[0]])
                     fieldnames.append('elongFlag')
                     datatypes.append(object)
@@ -912,8 +910,8 @@ class query():
                     fieldnames.append('alpha')
                     datatypes.append(np.float64)
                 elif (item.find('/r') > -1):
-                    this_eph.append({'/L':'leading', '/T':'trailing',
-                                     '/?':'not defined'}\
+                    this_eph.append({'/L': 'leading', '/T': 'trailing',
+                                     '/?': 'not defined'}
                                     [line[idx]])
                     fieldnames.append('elongFlag')
                     datatypes.append(object)
@@ -992,20 +990,17 @@ class query():
         # combine ephemerides with column names and data types into ndarray
         assert len(ephemerides[0]) == len(fieldnames) == len(datatypes)
         self.data = np.array(ephemerides,
-                               dtype=[(str(fieldnames[i]), datatypes[i]) for i
-                                      in range(len(fieldnames))])
+                             dtype=[(str(fieldnames[i]), datatypes[i]) for i
+                                    in range(len(fieldnames))])
 
         return len(self)
-
-
-
 
     def get_elements(self, center='500@10', asteroid=False, comet=False):
         """Call JPL HORIZONS website to obtain orbital elements based on the
         provided targetname, epochs, and center code. For valid center
         codes, please refer to http://ssd.jpl.nasa.gov/horizons.cgi
 
-        :param center:  str; 
+        :param center:  str;
            center body (default: 500@10 = Sun)
         :result: int; number of epochs queried
         :example: >>> ceres = callhorizons.query('Ceres')
@@ -1051,10 +1046,10 @@ class query():
         # encode objectname for use in URL
         objectname = urllib.quote(self.targetname.encode("utf8"))
 
-        ### call Horizons website and extract data
+        # call Horizons website and extract data
         url = "http://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=l" \
-              + "&TABLE_TYPE='ELEMENTS'" \
-              + "&CSV_FORMAT='YES'" \
+            + "&TABLE_TYPE='ELEMENTS'" \
+            + "&CSV_FORMAT='YES'" \
               + "&CENTER='" + str(center) + "'" \
               + "&OUT_UNITS='AU-D'" \
               + "&REF_PLANE='ECLIPTIC'" \
@@ -1103,18 +1098,17 @@ class query():
         else:
             url += "&COMMAND='" + str(objectname) + "%3B'"
 
-
         if self.discreteepochs is not None:
             url += "&TLIST="
             for date in self.discreteepochs:
                 url += "'" + str(date) + "'"
         elif (self.start_epoch is not None and self.stop_epoch is not None and
               self.step_size is not None):
-            url +=  "&START_TIME='" \
-                    + urllib.quote(self.start_epoch.encode("utf8")) + "'" \
-                    + "&STOP_TIME='" \
-                    + urllib.quote(self.stop_epoch.encode("utf8")) + "'" \
-                    + "&STEP_SIZE='" + str(self.step_size) + "'"
+            url += "&START_TIME='" \
+                + urllib.quote(self.start_epoch.encode("utf8")) + "'" \
+                + "&STOP_TIME='" \
+                + urllib.quote(self.stop_epoch.encode("utf8")) + "'" \
+                + "&STEP_SIZE='" + str(self.step_size) + "'"
         else:
             raise IOError('no epoch information given')
 
@@ -1131,16 +1125,16 @@ class query():
                 # wait 1 second and try again
             i += 1
             if i > 50:
-                return 0 # website could not be reached
+                return 0  # website could not be reached
 
-        ### disseminate website source code
+        # disseminate website source code
         # identify header line and extract data block (elements data)
         # also extract targetname, abs. magnitude (H), and slope parameter (G)
         headerline = []
         datablock = []
         in_datablock = False
         H, G = np.nan, np.nan
-        for idx,line in enumerate(src):
+        for idx, line in enumerate(src):
             line = line.decode('UTF-8')
 
             if 'JDTDB,' in line:
@@ -1165,26 +1159,25 @@ class query():
                     except ValueError:
                         pass
             if ("Multiple major-bodies match string" in src[idx].decode('UTF-8') or
-               ("Matching small-bodies" in src[idx].decode('UTF-8') and not
-                "No matches found" in src[idx+1].decode('UTF-8'))):
+                ("Matching small-bodies" in src[idx].decode('UTF-8') and not
+                    "No matches found" in src[idx+1].decode('UTF-8'))):
                 raise ValueError('Ambiguous target name; check URL: %s' %
                                  url)
             if ("Matching small-bodies" in src[idx].decode('UTF-8') and
-                "No matches found" in src[idx+1].decode('UTF-8')):
+                    "No matches found" in src[idx+1].decode('UTF-8')):
                 raise ValueError('Unknown target; check URL: %s' % url)
 
-
-        ### field identification for each line in
+        # field identification for each line in
         elements = []
         for line in datablock:
             line = line.split(',')
 
-            this_el   = []
+            this_el = []
             fieldnames = []
-            datatypes   = []
+            datatypes = []
 
             # create a dictionary for each date (each line)
-            for idx,item in enumerate(headerline):
+            for idx, item in enumerate(headerline):
                 if (item.find('JDTDB') > -1):
                     this_el.append(np.float64(line[idx]))
                     fieldnames.append('datetime_jd')
@@ -1226,7 +1219,8 @@ class query():
                     fieldnames.append('trueanomaly')
                     datatypes.append(np.float64)
                 if (item.find('PR') > -1):
-                    this_el.append(np.float64(line[idx])/(365.256)) # Earth years
+                    # Earth years
+                    this_el.append(np.float64(line[idx])/(365.256))
                     fieldnames.append('period')
                     datatypes.append(np.float64)
                 if (item.find('AD') > -1):
@@ -1255,16 +1249,13 @@ class query():
         if len(elements) == 0:
             return 0
 
-
         # combine elements with column names and data types into ndarray
         assert len(elements[0]) == len(fieldnames) == len(datatypes)
         self.data = np.array(elements,
-                               dtype=[(str(fieldnames[i]), datatypes[i]) for i
-                                      in range(len(fieldnames))])
+                             dtype=[(str(fieldnames[i]), datatypes[i]) for i
+                                    in range(len(fieldnames))])
 
         return len(self)
-
-
 
     def export2pyephem(self, center='500@10', equinox=2000.):
         """Call JPL HORIZONS website to obtain orbital elements based on the
@@ -1299,26 +1290,25 @@ class query():
         try:
             import ephem
         except ImportError:
-            raise ImportError('export2pyephem requires PyEphem to be installed')
+            raise ImportError(
+                'export2pyephem requires PyEphem to be installed')
 
         # obtain orbital elements
         self.get_elements(center)
 
         objects = []
         for el in self.data:
-            n = 0.9856076686/np.sqrt(el['a']**3) # mean daily motion
+            n = 0.9856076686/np.sqrt(el['a']**3)  # mean daily motion
             epoch_djd = el['datetime_jd']-2415020.0  # Dublin Julian date
             epoch = ephem.date(epoch_djd)
-            epoch_str = "%d/%f/%d" %(epoch.triple()[1], epoch.triple()[2],
-                                     epoch.triple()[0])
+            epoch_str = "%d/%f/%d" % (epoch.triple()[1], epoch.triple()[2],
+                                      epoch.triple()[0])
 
             # export to PyEphem
-            objects.append(ephem.readdb("%s,e,%f,%f,%f,%f,%f,%f,%f,%s,%i,%f,%f"%
-                                    (el['targetname'], el['incl'], el['node'],
-                                     el['argper'], el['a'], n, el['e'],
-                                     el['meananomaly'], epoch_str, equinox,
-                                    el['H'], el['G'])))
+            objects.append(ephem.readdb("%s,e,%f,%f,%f,%f,%f,%f,%f,%s,%i,%f,%f" %
+                                        (el['targetname'], el['incl'], el['node'],
+                                         el['argper'], el['a'], n, el['e'],
+                                            el['meananomaly'], epoch_str, equinox,
+                                            el['H'], el['G'])))
 
         return objects
-
-
