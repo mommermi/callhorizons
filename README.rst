@@ -71,6 +71,8 @@ michael.mommert (at) nau.edu
 Changelog
 ---------
 
+* 2018-07-12: fix in http protocol, final version of `callhorizons` (v1.1)
+
 * 2017-08-22: improved `parse_asteroid` function
 
 * 2017-07-05: fixed `KeyError` for solar elongation of the Sun (thanks to Pavel!)
