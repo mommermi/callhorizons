@@ -569,7 +569,7 @@ class query():
         objectname = urllib.quote(self.targetname.encode("utf8"))
 
         # construct URL for HORIZONS query
-        url = "http://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=l" \
+        url = "https://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=l" \
             + "&TABLE_TYPE='OBSERVER'" \
             + "&QUANTITIES='" + str(quantities) + "'" \
               + "&CSV_FORMAT='YES'" \
