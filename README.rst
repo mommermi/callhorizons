@@ -1,15 +1,10 @@
 CALLHORIZONS - a Python Interface to JPL HORIZONS
 =================================================
 
-Please note that CALLHORIZONS is not maintained anymore
--------------------------------------------------------
-
-Please use
-`astroquery.jplhorizons
-<http://astroquery.readthedocs.io/en/latest/jplhorizons/jplhorizons.html>`_
-instead, which will be maintained in the future and offers additional
-functionality. I apologize for any inconvenience.
-
+**Please note that CALLHORIZONS is not maintained anymore. Please use**
+[astroquery.jplhorizons](http://astroquery.readthedocs.io/en/latest/jplhorizons/jplhorizons.html)
+**instead, which will be maintained in the future and offers additional
+functionality. I apologize for any inconvenience.**
 
 Overview
 --------
