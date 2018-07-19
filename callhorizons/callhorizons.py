@@ -1047,7 +1047,7 @@ class query():
         objectname = urllib.quote(self.targetname.encode("utf8"))
 
         # call Horizons website and extract data
-        url = "http://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=l" \
+        url = "https://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=l" \
             + "&TABLE_TYPE='ELEMENTS'" \
             + "&CSV_FORMAT='YES'" \
               + "&CENTER='" + str(center) + "'" \
